@@ -825,7 +825,7 @@ export const Map: React.FC<MapProps> = ({
         });
       }
 
-      // 4. Place interactive Midpoint Duration Badges for each route (TomTom Plan Image 4)
+      // 4. Place interactive Midpoint Duration Badges for each route (staggered to prevent overlap)
       if (!isDrivingMode) {
         routes.forEach((rt, idx) => {
           const isSelected = idx === selectedRouteIndex;
@@ -833,22 +833,18 @@ export const Map: React.FC<MapProps> = ({
           const distKm = Math.round(rt.summary.lengthInMeters / 1000);
           const hasDelay = (rt.summary.trafficDelayInSeconds || 0) > 60;
           const delayText = hasDelay
-            ? `+${Math.round(rt.summary.trafficDelayInSeconds / 60)} min`
-            : 'No delays';
+            ? `+${Math.round(rt.summary.trafficDelayInSeconds / 60)}m`
+            : '';
 
           const badgeEl = document.createElement('div');
           badgeEl.className = `route-time-badge ${isSelected ? 'is-active' : 'is-alternative'}`;
           badgeEl.title = `Route ${idx + 1}: ${durationStr} (${distKm} km). Click to select.`;
 
           badgeEl.innerHTML = `
-            <div class="badge-top-row">
-              <span class="badge-duration">${durationStr}</span>
-              <span class="badge-dot">•</span>
-              <span class="badge-distance">${distKm} km</span>
-            </div>
-            <div class="badge-sub-row ${hasDelay ? 'has-delay' : 'no-delay'}">
-              ${hasDelay ? '🚗 ' : ''}${delayText}
-            </div>
+            <span class="badge-duration">${durationStr}</span>
+            <span class="badge-dot">•</span>
+            <span class="badge-distance">${distKm} km</span>
+            ${hasDelay ? `<span class="badge-delay">${delayText}</span>` : ''}
           `;
 
           badgeEl.addEventListener('click', (e) => {
@@ -858,8 +854,18 @@ export const Map: React.FC<MapProps> = ({
             }
           });
 
+          // Stagger coordinate along polyline to strictly prevent badges from overlapping!
+          const coords = rt.geojson?.features?.[0]?.geometry?.coordinates as [number, number][];
+          let badgeCoord = rt.midpoint;
+          if (coords && coords.length > 6) {
+            const fractions = [0.45, 0.70, 0.25, 0.85];
+            const frac = fractions[idx % fractions.length];
+            const targetIdx = Math.floor(coords.length * frac);
+            badgeCoord = coords[targetIdx] || rt.midpoint;
+          }
+
           const badgeMarker = new tt.Marker({ element: badgeEl })
-            .setLngLat(rt.midpoint)
+            .setLngLat(badgeCoord)
             .addTo(map);
 
           routeBadgeMarkersRef.current.push(badgeMarker);

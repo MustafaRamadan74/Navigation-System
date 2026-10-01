@@ -173,120 +173,23 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   };
 
   return (
-    <aside
-      className={`route-panel-card ${isMobileCollapsed ? 'is-collapsed' : ''} ${hasRoutes && isMobileTripCardMode ? 'is-mobile-trip-card' : ''}`}
-      aria-label="Route Planning Panel"
-    >
-      {/* Mobile drag handle */}
-      <div
-        className="bottom-sheet-handle"
-        onClick={() => {
-          if (hasRoutes) {
-            setIsMobileTripCardMode((prev) => !prev);
-          } else {
-            setIsMobileCollapsed((prev) => !prev);
-          }
-        }}
-        title="Toggle panel"
-        aria-label="Toggle panel height"
-      />
-
-      {/* Mobile Trip Summary Bottom Card (Google Maps / TomTom GO UX on mobile) */}
-      {hasRoutes && activeRoute && isMobileTripCardMode && (
-        <div className="mobile-trip-summary-card">
-          <div className="mobile-trip-main-info">
-            <div className="mobile-trip-time-box">
-              <div className="mobile-trip-duration-row">
-                <span className="mobile-trip-duration">
-                  {formatDuration(activeRoute.summary.travelTimeInSeconds)}
-                </span>
-                {activeRoute.summary.trafficDelayInSeconds > 60 ? (
-                  <span className="mobile-traffic-tag delayed">
-                    +{Math.round(activeRoute.summary.trafficDelayInSeconds / 60)}m
-                  </span>
-                ) : (
-                  <span className="mobile-traffic-tag fast">
-                    {language === 'ar' ? 'أسرع مسار' : 'Fastest'}
-                  </span>
-                )}
-              </div>
-              <div className="mobile-trip-meta">
-                <span>{formatDistance(activeRoute.summary.lengthInMeters, preferences.distanceUnit)}</span>
-                <span className="meta-sep">·</span>
-                <span>{formatArrivalTime(activeRoute.summary.arrivalTime, activeRoute.summary.travelTimeInSeconds)}</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="mobile-trip-edit-btn"
-              onClick={() => setIsMobileTripCardMode(false)}
-              title={t('editRoute')}
-              aria-label={t('editRoute')}
-            >
-              <span>✏️</span>
-              <span>{t('editRoute')}</span>
-            </button>
-          </div>
-
-          {/* Quick route alternatives if multiple routes exist */}
-          {routes.length > 1 && (
-            <div className="mobile-route-alt-chips">
-              {routes.map((rt, idx) => (
-                <button
-                  key={rt.id || idx}
-                  type="button"
-                  className={`mobile-alt-chip ${idx === selectedRouteIndex ? 'is-active' : ''}`}
-                  onClick={() => onSelectRoute(idx)}
-                >
-                  <span className="mobile-alt-num">#{idx + 1}</span>
-                  <span>{formatDuration(rt.summary.travelTimeInSeconds)}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Start Driving Primary Action Button */}
-          <div className="mobile-trip-actions">
-            <button
-              type="button"
-              className="mobile-start-nav-btn"
-              onClick={onStartDriving}
-              title={t('startNavigation')}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="3 11 22 2 13 21 11 13 3 11" />
-              </svg>
-              <span>{t('startNavigation')}</span>
-            </button>
-
-            {onStartSimulation && (
-              <button
-                type="button"
-                className="mobile-sim-nav-btn"
-                onClick={onStartSimulation}
-                title={t('simulateRoute')}
-                aria-label={t('simulateRoute')}
-              >
-                <span>▶️</span>
-                <span>{t('simulateRoute')}</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Main panel content - hidden on mobile when compact trip card is active */}
-      {!showMobileTripCardOnly && (
-        <>
-          <header className="route-panel-header">
-        <div className="route-panel-brand">
-          {/* Hamburger Menu button to open Map Options Drawer */}
+    <>
+      {/* Small Screen Floating Top Search Bar (When collapsed and no route is active) */}
+      {isMobileScreen && isMobileCollapsed && !hasRoutes && (
+        <div
+          className="mobile-top-search-pill"
+          onClick={() => setIsMobileCollapsed(false)}
+          role="button"
+          tabIndex={0}
+        >
           {onOpenMapOptions && (
             <button
               type="button"
-              className="panel-tool-btn menu-btn"
-              onClick={onOpenMapOptions}
+              className="pill-menu-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenMapOptions();
+              }}
               title={language === 'ar' ? 'القائمة وخيارات الخريطة' : 'Menu & Map Options'}
               aria-label="Menu"
             >
@@ -294,87 +197,228 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
             </button>
           )}
 
-          <svg
-            className="route-panel-logo"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polygon points="3 11 22 2 13 21 11 13 3 11" />
-          </svg>
-          <span className="route-panel-title">{t('appName')}</span>
-        </div>
+          <div className="pill-input-mock">
+            <span className="pill-icon">🔍</span>
+            <span className="pill-placeholder">{destinationPoint?.name || t('whereTo')}</span>
+          </div>
 
-        <div className="route-panel-header-actions">
-          {/* Mobile View Map Button (when user is editing a route on mobile) */}
-          {hasRoutes && !isMobileTripCardMode && (
-            <button
-              type="button"
-              className="panel-tool-btn mobile-view-map-btn"
-              onClick={() => setIsMobileTripCardMode(true)}
-              title={t('viewRoute')}
-              aria-label={t('viewRoute')}
-            >
-              <span>🗺️ {t('viewRoute')}</span>
-            </button>
-          )}
-
-          {/* Map Options Button */}
-          {onOpenMapOptions && (
-            <button
-              type="button"
-              className="panel-tool-btn"
-              onClick={onOpenMapOptions}
-              title={language === 'ar' ? 'خيارات الخريطة والطبقات' : 'Map Options & Layers'}
-              aria-label="Map options"
-            >
-              🗺️
-            </button>
-          )}
-
-          {/* Theme Toggle Button */}
           <button
             type="button"
-            className="panel-tool-btn"
-            onClick={onToggleTheme}
-            title={theme === 'dark' ? t('lightMode') : t('darkMode')}
-            aria-label="Toggle light or dark theme"
-          >
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-
-          {/* Language Toggle Button */}
-          <button
-            type="button"
-            className="panel-tool-btn lang-btn"
-            onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-            title="Switch Language / تغيير اللغة"
-            aria-label="Toggle language between Arabic and English"
-          >
-            {language === 'ar' ? 'EN' : 'عربي'}
-          </button>
-
-          {/* Mobile Collapse Chevron Button */}
-          <button
-            type="button"
-            className="panel-tool-btn mobile-collapse-btn"
-            onClick={() => {
-              if (hasRoutes) {
-                setIsMobileTripCardMode(true);
-              } else {
-                setIsMobileCollapsed((prev) => !prev);
-              }
+            className="pill-directions-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMobileCollapsed(false);
             }}
-            title={isMobileCollapsed ? 'Expand' : 'Minimize'}
-            aria-label="Toggle panel"
+            title={t('tabDirections')}
+            aria-label="Directions"
           >
-            {isMobileCollapsed ? '▲' : '▼'}
+            🧭
           </button>
         </div>
-      </header>
+      )}
+
+      <aside
+        className={`route-panel-card ${isMobileCollapsed ? 'is-collapsed' : ''} ${hasRoutes && isMobileTripCardMode ? 'is-mobile-trip-card' : ''}`}
+        aria-label="Route Planning Panel"
+      >
+        {/* Mobile drag handle */}
+        <div
+          className="bottom-sheet-handle"
+          onClick={() => {
+            if (hasRoutes) {
+              setIsMobileTripCardMode((prev) => !prev);
+            } else {
+              setIsMobileCollapsed((prev) => !prev);
+            }
+          }}
+          title="Toggle panel"
+          aria-label="Toggle panel height"
+        />
+
+        {/* Mobile Trip Summary Bottom Card (Google Maps / TomTom GO UX on mobile) */}
+        {hasRoutes && activeRoute && isMobileTripCardMode && (
+          <div className="mobile-trip-summary-card">
+            <div className="mobile-trip-main-info">
+              <div className="mobile-trip-time-box">
+                <div className="mobile-trip-duration-row">
+                  <span className="mobile-trip-duration">
+                    {formatDuration(activeRoute.summary.travelTimeInSeconds)}
+                  </span>
+                  {activeRoute.summary.trafficDelayInSeconds > 60 ? (
+                    <span className="mobile-traffic-tag delayed">
+                      +{Math.round(activeRoute.summary.trafficDelayInSeconds / 60)}m
+                    </span>
+                  ) : (
+                    <span className="mobile-traffic-tag fast">
+                      {language === 'ar' ? 'أسرع مسار' : 'Fastest'}
+                    </span>
+                  )}
+                </div>
+                <div className="mobile-trip-meta">
+                  <span>{formatDistance(activeRoute.summary.lengthInMeters, preferences.distanceUnit)}</span>
+                  <span className="meta-sep">·</span>
+                  <span>{formatArrivalTime(activeRoute.summary.arrivalTime, activeRoute.summary.travelTimeInSeconds)}</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="mobile-trip-edit-btn"
+                onClick={() => setIsMobileTripCardMode(false)}
+                title={t('editRoute')}
+                aria-label={t('editRoute')}
+              >
+                <span>✏️</span>
+                <span>{t('editRoute')}</span>
+              </button>
+            </div>
+
+            {/* Quick route alternatives if multiple routes exist */}
+            {routes.length > 1 && (
+              <div className="mobile-route-alt-chips">
+                {routes.map((rt, idx) => (
+                  <button
+                    key={rt.id || idx}
+                    type="button"
+                    className={`mobile-alt-chip ${idx === selectedRouteIndex ? 'is-active' : ''}`}
+                    onClick={() => onSelectRoute(idx)}
+                  >
+                    <span className="mobile-alt-num">#{idx + 1}</span>
+                    <span>{formatDuration(rt.summary.travelTimeInSeconds)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Start Driving Primary Action Button */}
+            <div className="mobile-trip-actions">
+              <button
+                type="button"
+                className="mobile-start-nav-btn"
+                onClick={onStartDriving}
+                title={t('startNavigation')}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                </svg>
+                <span>{t('startNavigation')}</span>
+              </button>
+
+              {onStartSimulation && (
+                <button
+                  type="button"
+                  className="mobile-sim-nav-btn"
+                  onClick={onStartSimulation}
+                  title={t('simulateRoute')}
+                  aria-label={t('simulateRoute')}
+                >
+                  <span>▶️</span>
+                  <span>{t('simulateRoute')}</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Main panel content - hidden on mobile when compact trip card is active */}
+        {!showMobileTripCardOnly && (
+          <>
+            <header className="route-panel-header">
+              <div className="route-panel-brand">
+                {/* Hamburger Menu button to open Map Options Drawer */}
+                {onOpenMapOptions && (
+                  <button
+                    type="button"
+                    className="panel-tool-btn menu-btn"
+                    onClick={onOpenMapOptions}
+                    title={language === 'ar' ? 'القائمة وخيارات الخريطة' : 'Menu & Map Options'}
+                    aria-label="Menu"
+                  >
+                    ☰
+                  </button>
+                )}
+
+                <svg
+                  className="route-panel-logo"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polygon points="3 11 22 2 13 21 11 13 3 11" />
+                </svg>
+                <span className="route-panel-title">{t('appName')}</span>
+              </div>
+
+              <div className="route-panel-header-actions">
+                {/* Mobile View Map Button (icon only on small screens to prevent overflow) */}
+                {hasRoutes && !isMobileTripCardMode && (
+                  <button
+                    type="button"
+                    className="panel-tool-btn mobile-view-map-btn"
+                    onClick={() => setIsMobileTripCardMode(true)}
+                    title={t('viewRoute')}
+                    aria-label={t('viewRoute')}
+                  >
+                    🗺️
+                  </button>
+                )}
+
+                {/* Map Options Button */}
+                {onOpenMapOptions && (
+                  <button
+                    type="button"
+                    className="panel-tool-btn"
+                    onClick={onOpenMapOptions}
+                    title={language === 'ar' ? 'خيارات الخريطة والطبقات' : 'Map Options & Layers'}
+                    aria-label="Map options"
+                  >
+                    🗺️
+                  </button>
+                )}
+
+                {/* Theme Toggle Button */}
+                <button
+                  type="button"
+                  className="panel-tool-btn"
+                  onClick={onToggleTheme}
+                  title={theme === 'dark' ? t('lightMode') : t('darkMode')}
+                  aria-label="Toggle light or dark theme"
+                >
+                  {theme === 'dark' ? '☀️' : '🌙'}
+                </button>
+
+                {/* Language Toggle Button */}
+                <button
+                  type="button"
+                  className="panel-tool-btn lang-btn"
+                  onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+                  title="Switch Language / تغيير اللغة"
+                  aria-label="Toggle language between Arabic and English"
+                >
+                  {language === 'ar' ? 'EN' : 'عربي'}
+                </button>
+
+                {/* Mobile Close/Minimize Button */}
+                <button
+                  type="button"
+                  className="panel-tool-btn mobile-collapse-btn"
+                  onClick={() => {
+                    if (hasRoutes) {
+                      setIsMobileTripCardMode(true);
+                    } else {
+                      setIsMobileCollapsed(true);
+                    }
+                  }}
+                  title={language === 'ar' ? 'إغلاق وتصغير' : 'Close'}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+            </header>
 
       {/* Primary Section Switcher: Directions vs Saved Places */}
       <nav className="route-panel-segmented-tabs" aria-label="Panel Navigation">
@@ -671,5 +715,6 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
         </>
       )}
     </aside>
+    </>
   );
 };

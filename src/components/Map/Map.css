@@ -54,73 +54,80 @@
   border: 2px solid #ffffff;
 }
 
-/* Route Time Badges on Map (TomTom Plan Image 4) */
+/* Route Time Badges on Map (Sleek Dark Theme) */
 .route-time-badge {
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.75);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   font-family: inherit;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .route-time-badge:hover {
-  transform: translateY(-2px) scale(1.06);
+  transform: translateY(-2px) scale(1.08);
+  z-index: 50;
 }
 
 .route-time-badge.is-active {
-  background: #0284c7;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 18px rgba(2, 132, 199, 0.6), 0 4px 16px rgba(0, 0, 0, 0.45);
+  background: rgba(29, 33, 40, 0.95);
+  color: var(--palette-gold, #FF9E20);
+  border: 1.5px solid var(--palette-gold, #FF9E20);
+  box-shadow: 0 0 16px rgba(255, 158, 32, 0.45), 0 4px 14px rgba(0, 0, 0, 0.8);
+  z-index: 20;
 }
 
 .route-time-badge.is-alternative {
-  background: #ffffff;
-  color: #0f172a;
-  border: 1px solid #cbd5e1;
+  background: rgba(20, 24, 30, 0.92);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  opacity: 0.92;
+  z-index: 10;
 }
 
-.badge-top-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 13px;
+.route-time-badge.is-alternative:hover {
+  background: rgba(29, 33, 40, 0.98);
+  color: #ffffff;
+  border-color: rgba(255, 158, 32, 0.5);
+  opacity: 1;
+}
+
+.badge-duration {
+  font-size: 11.5px;
   font-weight: 800;
-  line-height: 1.2;
-}
-
-.badge-dot {
-  opacity: 0.6;
-}
-
-.badge-sub-row {
-  font-size: 11px;
-  font-weight: 700;
   line-height: 1;
 }
 
-.badge-sub-row.no-delay {
-  color: #e2f2f3;
-  opacity: 0.9;
+.route-time-badge.is-active .badge-duration {
+  color: var(--palette-gold, #FF9E20);
 }
 
-.route-time-badge.is-active .badge-sub-row.no-delay {
-  color: #e0f2fe;
+.badge-dot {
+  opacity: 0.5;
+  font-size: 9px;
 }
 
-.badge-sub-row.has-delay {
-  color: #ef4444;
+.badge-distance {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
 }
 
-.route-time-badge.is-active .badge-sub-row.has-delay {
-  color: #fecdd3;
+.badge-delay {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.25);
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-left: 2px;
 }
 
 .marker-label {

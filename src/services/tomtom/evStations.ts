@@ -153,20 +153,31 @@ export async function fetchAllEgyptEVStations(): Promise<EVStation[]> {
       })
       .catch(() => {});
 
-    // 2. Query regional hubs across Egypt in parallel for high density
-    const hubPromises = EGYPT_EV_HUBS.map(async (hub) => {
-      try {
-        const url = `https://api.tomtom.com/search/2/nearbySearch/.json?key=${TOMTOM_API_KEY}&lat=${hub.lat}&lon=${hub.lon}&radius=${hub.radius}&categorySet=7309&limit=${hub.limit}`;
-        const res = await fetch(url);
-        if (!res.ok) return;
-        const data = await res.json();
-        (data.results || []).forEach(parseStationItem);
-      } catch {
-        // Ignored
+    // 2. Query regional hubs across Egypt in batches of 3 to avoid exceeding 5 QPS
+    for (let i = 0; i < EGYPT_EV_HUBS.length; i += 3) {
+      const batch = EGYPT_EV_HUBS.slice(i, i + 3);
+      await Promise.all(
+        batch.map(async (hub) => {
+          try {
+            const url = `https://api.tomtom.com/search/2/nearbySearch/.json?key=${TOMTOM_API_KEY}&lat=${hub.lat}&lon=${hub.lon}&radius=${hub.radius}&categorySet=7309&limit=${hub.limit}`;
+            let res = await fetch(url);
+            if (res.status === 429) {
+              await new Promise((r) => setTimeout(r, 600));
+              res = await fetch(url);
+            }
+            if (!res.ok) return;
+            const data = await res.json();
+            (data.results || []).forEach(parseStationItem);
+          } catch {
+            // Ignored
+          }
+        })
+      );
+      if (i + 3 < EGYPT_EV_HUBS.length) {
+        await new Promise((r) => setTimeout(r, 220));
       }
-    });
-
-    await Promise.all([catPromise, ...hubPromises]);
+    }
+    await catPromise;
   } catch (e) {
     console.warn('Failed to load Egypt EV stations:', e);
   }
@@ -235,66 +246,72 @@ export async function searchEVStationsAlongRoute(
     }
   });
 
-  // 3. Supplement with TomTom nearby search along route key points (start, end, and steps)
-  if (TOMTOM_API_KEY) {
+  // 3. Supplement with TomTom nearby search along route key points (throttled to respect 5 QPS rate limit)
+  if (TOMTOM_API_KEY && routeCoordinates.length > 0) {
     const samplePoints: [number, number][] = [];
-    samplePoints.push(routeCoordinates[0]); // Start point (e.g. El Obour)
-
-    const step = Math.max(1, Math.floor(routeCoordinates.length / 8));
-    for (let i = step; i < routeCoordinates.length - 1; i += step) {
-      samplePoints.push(routeCoordinates[i]);
-    }
-
+    samplePoints.push(routeCoordinates[0]); // Start point
     if (routeCoordinates.length > 1) {
       samplePoints.push(routeCoordinates[routeCoordinates.length - 1]); // Destination point
     }
+    // Midpoint sample if long route
+    if (routeCoordinates.length > 20) {
+      const midIdx = Math.floor(routeCoordinates.length / 2);
+      samplePoints.push(routeCoordinates[midIdx]);
+    }
 
-    await Promise.all(
-      samplePoints.map(async ([lng, lat]) => {
-        try {
-          const url = `https://api.tomtom.com/search/2/nearbySearch/.json?key=${TOMTOM_API_KEY}&lat=${lat}&lon=${lng}&radius=${radiusMeters}&categorySet=7309&limit=30`;
-          const res = await fetch(url);
-          if (!res.ok) return;
-
-          const data = await res.json();
-          const results = data.results || [];
-
-          for (const item of results) {
-            if (!item.id || stationsMap.has(item.id)) continue;
-
-            const stationLng = item.position?.lon ?? item.position?.longitude;
-            const stationLat = item.position?.lat ?? item.position?.latitude;
-            if (typeof stationLng !== 'number' || typeof stationLat !== 'number') continue;
-
-            const distKm = getMinDistanceToRouteKm([stationLng, stationLat], routeCoordinates);
-            // Strictly inside 20 km buffer
-            if (distKm <= maxDistanceKm) {
-              stationsMap.set(item.id, {
-                id: item.id,
-                name: item.poi?.name || 'EV Charging Station',
-                address: item.address?.freeformAddress || `${stationLat.toFixed(4)}, ${stationLng.toFixed(4)}`,
-                coordinates: [stationLng, stationLat],
-                status: 'available',
-                distanceToRouteKm: Math.round(distKm * 10) / 10,
-                isNearRoute: true,
-                connectors: [
-                  {
-                    type: 'Type 2 / CCS (Fast Charge)',
-                    total: 2,
-                    available: 2,
-                    occupied: 0,
-                    outOfService: 0,
-                    powerKW: 50,
-                  },
-                ],
-              });
-            }
-          }
-        } catch {
-          // Ignored
+    // Process sequentially with delay to avoid TomTom 429 Too Many Requests
+    for (const [lng, lat] of samplePoints) {
+      try {
+        const url = `https://api.tomtom.com/search/2/nearbySearch/.json?key=${TOMTOM_API_KEY}&lat=${lat}&lon=${lng}&radius=${radiusMeters}&categorySet=7309&limit=30`;
+        let res = await fetch(url);
+        if (res.status === 429) {
+          // Wait 600ms and retry once if rate limited
+          await new Promise((r) => setTimeout(r, 600));
+          res = await fetch(url);
         }
-      })
-    );
+        if (!res.ok) continue;
+
+        const data = await res.json();
+        const results = data.results || [];
+
+        for (const item of results) {
+          if (!item.id || stationsMap.has(item.id)) continue;
+
+          const stationLng = item.position?.lon ?? item.position?.longitude;
+          const stationLat = item.position?.lat ?? item.position?.latitude;
+          if (typeof stationLng !== 'number' || typeof stationLat !== 'number') continue;
+
+          const distKm = getMinDistanceToRouteKm([stationLng, stationLat], routeCoordinates);
+          // Strictly inside 20 km buffer
+          if (distKm <= maxDistanceKm) {
+            stationsMap.set(item.id, {
+              id: item.id,
+              name: item.poi?.name || 'EV Charging Station',
+              address: item.address?.freeformAddress || `${stationLat.toFixed(4)}, ${stationLng.toFixed(4)}`,
+              coordinates: [stationLng, stationLat],
+              status: 'available',
+              distanceToRouteKm: Math.round(distKm * 10) / 10,
+              isNearRoute: true,
+              connectors: [
+                {
+                  type: 'Type 2 / CCS (Fast Charge)',
+                  total: 2,
+                  available: 2,
+                  occupied: 0,
+                  outOfService: 0,
+                  powerKW: 50,
+                },
+              ],
+            });
+          }
+        }
+
+        // 250ms gap between calls to stay well below 5 QPS
+        await new Promise((r) => setTimeout(r, 250));
+      } catch {
+        // Silently continue with existing cached stations
+      }
+    }
   }
 
   const bufferStations = Array.from(stationsMap.values());
