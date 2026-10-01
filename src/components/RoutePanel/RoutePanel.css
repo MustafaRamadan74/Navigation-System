@@ -398,6 +398,17 @@ html[dir='rtl'] .route-panel-card {
   min-height: 32px;
 }
 
+/* Hide mobile trip summary card on desktop */
+@media (min-width: 769px) {
+  .mobile-trip-summary-card {
+    display: none !important;
+  }
+  .mobile-view-map-btn,
+  .mobile-collapse-btn {
+    display: none !important;
+  }
+}
+
 /* ========================================= */
 /* Responsive & Mobile Bottom Sheet Layout   */
 /* ========================================= */
@@ -414,8 +425,8 @@ html[dir='rtl'] .route-panel-card {
     border-left: none;
     border-right: none;
     border-bottom: none;
-    padding: 12px 16px 24px;
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+    padding: 10px 14px 18px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
     z-index: 1000;
   }
 
@@ -429,19 +440,246 @@ html[dir='rtl'] .route-panel-card {
     width: 44px;
     height: 5px;
     border-radius: 3px;
-    margin-bottom: 8px;
+    margin: 0 auto 6px;
+    cursor: pointer;
+    background: rgba(255, 158, 32, 0.4);
   }
 
+  /* When collapsed on mobile (no routes) */
   .route-panel-card.is-collapsed {
-    max-height: 72px;
+    max-height: 56px;
     overflow: hidden;
+    padding: 6px 12px;
   }
 
-  /* Phase 18: Ensure min 44x44px touch targets on mobile */
+  .route-panel-card.is-collapsed > *:not(.bottom-sheet-handle):not(.route-panel-header) {
+    display: none !important;
+  }
+
+  /* Google Maps / TomTom Go UX: Compact bottom card when route is ready */
+  .route-panel-card.is-mobile-trip-card {
+    height: auto !important;
+    max-height: 195px !important;
+    padding: 6px 14px 14px !important;
+    overflow: hidden !important;
+    border-top: 1.5px solid var(--palette-gold, #FF9E20) !important;
+    box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.7) !important;
+  }
+
+  /* Hide all form inputs and header when in compact trip card mode */
+  .route-panel-card.is-mobile-trip-card > :not(.mobile-trip-summary-card) {
+    display: none !important;
+  }
+
+  .mobile-trip-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    animation: fadeInSlideUp 0.25s ease-out;
+  }
+
+  @keyframes fadeInSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile-trip-main-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .mobile-trip-time-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mobile-trip-duration-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-trip-duration {
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: var(--palette-gold, #FF9E20);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  .mobile-traffic-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  .mobile-traffic-tag.fast {
+    background: rgba(33, 94, 97, 0.35);
+    color: #5eead4;
+    border: 1px solid rgba(94, 234, 212, 0.3);
+  }
+
+  .mobile-traffic-tag.delayed {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+  }
+
+  .mobile-trip-meta {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .meta-sep {
+    opacity: 0.5;
+  }
+
+  .mobile-trip-edit-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(33, 94, 97, 0.25);
+    border: 1px solid rgba(255, 158, 32, 0.35);
+    border-radius: 9px;
+    padding: 6px 11px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-trip-edit-btn:hover {
+    background: rgba(33, 94, 97, 0.45);
+    border-color: var(--palette-gold, #FF9E20);
+  }
+
+  .mobile-route-alt-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 2px 0;
+    scrollbar-width: none;
+  }
+
+  .mobile-route-alt-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-alt-chip {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 8px;
+    padding: 4px 9px;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+  }
+
+  .mobile-alt-chip.is-active {
+    background: var(--palette-teal, #215E61);
+    border-color: var(--palette-gold, #FF9E20);
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .mobile-alt-num {
+    opacity: 0.7;
+    font-size: 0.65rem;
+  }
+
+  .mobile-trip-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  .mobile-start-nav-btn {
+    flex: 1;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #FF9E20 0%, #e6850e 100%);
+    color: #1D2128;
+    font-size: 0.92rem;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(255, 158, 32, 0.4);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-start-nav-btn:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  .mobile-sim-nav-btn {
+    padding: 0 12px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(33, 94, 97, 0.3);
+    border: 1px solid rgba(255, 158, 32, 0.4);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .mobile-view-map-btn {
+    background: rgba(255, 158, 32, 0.15) !important;
+    border: 1px solid var(--palette-gold, #FF9E20) !important;
+    color: var(--palette-gold, #FF9E20) !important;
+    font-size: 0.74rem !important;
+    font-weight: 800 !important;
+    padding: 4px 8px !important;
+    border-radius: 8px !important;
+    min-height: 32px !important;
+    min-width: auto !important;
+  }
+
+  .mobile-collapse-btn {
+    font-size: 0.75rem !important;
+    min-height: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+  }
+
+  /* Phase 18: Ensure min 44x44px touch targets on mobile for controls */
   .panel-tool-btn {
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 15px;
+    min-width: 38px;
+    min-height: 38px;
+    font-size: 14px;
     border-radius: 10px;
   }
 

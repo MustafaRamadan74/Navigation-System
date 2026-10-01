@@ -89,6 +89,11 @@ export interface Translations {
   evStations: string;
   bestTime: string;
   reRouting: string;
+  whereTo: string;
+  editRoute: string;
+  viewRoute: string;
+  startNavigation: string;
+  simulateRoute: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -181,6 +186,11 @@ export const translations: Record<Language, Translations> = {
     evStations: 'محطات الشحن (EV)',
     bestTime: 'أفضل وقت للانطلاق',
     reRouting: 'تم رصد خروج عن المسار، جارِ إعادة الحساب...',
+    whereTo: 'إلى أين تريد الذهاب؟',
+    editRoute: 'تعديل المسار',
+    viewRoute: 'عرض المسار',
+    startNavigation: 'ابدأ القيادة',
+    simulateRoute: 'محاكاة',
   },
   en: {
     appName: 'GeoRoute',
@@ -271,5 +281,10 @@ export const translations: Record<Language, Translations> = {
     evStations: 'EV Chargers',
     bestTime: 'Best Time to Leave',
     reRouting: 'Deviation detected, recalculating route...',
+    whereTo: 'Where to?',
+    editRoute: 'Edit Route',
+    viewRoute: 'View Map',
+    startNavigation: 'Start Navigation',
+    simulateRoute: 'Simulate',
   },
 };

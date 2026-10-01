@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LocationPoint } from '../../types/location';
 import { RouteOption, TravelMode } from '../../types/route';
 import { SavedPlace, RecentRoute, UserPreferences, PlaceCategory } from '../../types/storage';
@@ -12,6 +12,7 @@ import { DeliveryModeToggle } from './DeliveryModeToggle';
 import { EVStationsToggle } from '../TrafficControls/EVStationsToggle';
 import { AppMode } from '../../hooks/useAppMode';
 import { BasemapStyle } from '../../utils/routeColors';
+import { formatDistance, formatDuration, formatArrivalTime } from '../../utils/formatters';
 import './RoutePanel.css';
 
 export interface RoutePanelProps {
@@ -126,6 +127,33 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   const [isMobileCollapsed, setIsMobileCollapsed] = useState<boolean>(false);
   const canAddMoreStops = waypoints.length < 5;
 
+  const hasRoutes = routes && routes.length > 0;
+  const activeRoute = hasRoutes ? routes[selectedRouteIndex] || routes[0] : null;
+
+  // Mobile Google Maps UX: When a route is calculated, collapse inputs into a sleek bottom trip card
+  const [isMobileTripCardMode, setIsMobileTripCardMode] = useState<boolean>(true);
+
+  // Automatically switch to compact trip summary card on mobile whenever routes are calculated/updated
+  useEffect(() => {
+    if (routes.length > 0) {
+      setIsMobileTripCardMode(true);
+    }
+  }, [routes.length]);
+
+  const [isMobileScreen, setIsMobileScreen] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const showMobileTripCardOnly = isMobileScreen && hasRoutes && isMobileTripCardMode;
+
   const homePlace = savedPlaces.find((p) => p.category === 'home');
   const workPlace = savedPlaces.find((p) => p.category === 'work');
 
@@ -146,18 +174,112 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
 
   return (
     <aside
-      className={`route-panel-card ${isMobileCollapsed ? 'is-collapsed' : ''}`}
+      className={`route-panel-card ${isMobileCollapsed ? 'is-collapsed' : ''} ${hasRoutes && isMobileTripCardMode ? 'is-mobile-trip-card' : ''}`}
       aria-label="Route Planning Panel"
     >
       {/* Mobile drag handle */}
       <div
         className="bottom-sheet-handle"
-        onClick={() => setIsMobileCollapsed((prev) => !prev)}
+        onClick={() => {
+          if (hasRoutes) {
+            setIsMobileTripCardMode((prev) => !prev);
+          } else {
+            setIsMobileCollapsed((prev) => !prev);
+          }
+        }}
         title="Toggle panel"
         aria-label="Toggle panel height"
       />
 
-      <header className="route-panel-header">
+      {/* Mobile Trip Summary Bottom Card (Google Maps / TomTom GO UX on mobile) */}
+      {hasRoutes && activeRoute && isMobileTripCardMode && (
+        <div className="mobile-trip-summary-card">
+          <div className="mobile-trip-main-info">
+            <div className="mobile-trip-time-box">
+              <div className="mobile-trip-duration-row">
+                <span className="mobile-trip-duration">
+                  {formatDuration(activeRoute.summary.travelTimeInSeconds)}
+                </span>
+                {activeRoute.summary.trafficDelayInSeconds > 60 ? (
+                  <span className="mobile-traffic-tag delayed">
+                    +{Math.round(activeRoute.summary.trafficDelayInSeconds / 60)}m
+                  </span>
+                ) : (
+                  <span className="mobile-traffic-tag fast">
+                    {language === 'ar' ? 'أسرع مسار' : 'Fastest'}
+                  </span>
+                )}
+              </div>
+              <div className="mobile-trip-meta">
+                <span>{formatDistance(activeRoute.summary.lengthInMeters, preferences.distanceUnit)}</span>
+                <span className="meta-sep">·</span>
+                <span>{formatArrivalTime(activeRoute.summary.arrivalTime, activeRoute.summary.travelTimeInSeconds)}</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="mobile-trip-edit-btn"
+              onClick={() => setIsMobileTripCardMode(false)}
+              title={t('editRoute')}
+              aria-label={t('editRoute')}
+            >
+              <span>✏️</span>
+              <span>{t('editRoute')}</span>
+            </button>
+          </div>
+
+          {/* Quick route alternatives if multiple routes exist */}
+          {routes.length > 1 && (
+            <div className="mobile-route-alt-chips">
+              {routes.map((rt, idx) => (
+                <button
+                  key={rt.id || idx}
+                  type="button"
+                  className={`mobile-alt-chip ${idx === selectedRouteIndex ? 'is-active' : ''}`}
+                  onClick={() => onSelectRoute(idx)}
+                >
+                  <span className="mobile-alt-num">#{idx + 1}</span>
+                  <span>{formatDuration(rt.summary.travelTimeInSeconds)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Start Driving Primary Action Button */}
+          <div className="mobile-trip-actions">
+            <button
+              type="button"
+              className="mobile-start-nav-btn"
+              onClick={onStartDriving}
+              title={t('startNavigation')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="3 11 22 2 13 21 11 13 3 11" />
+              </svg>
+              <span>{t('startNavigation')}</span>
+            </button>
+
+            {onStartSimulation && (
+              <button
+                type="button"
+                className="mobile-sim-nav-btn"
+                onClick={onStartSimulation}
+                title={t('simulateRoute')}
+                aria-label={t('simulateRoute')}
+              >
+                <span>▶️</span>
+                <span>{t('simulateRoute')}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Main panel content - hidden on mobile when compact trip card is active */}
+      {!showMobileTripCardOnly && (
+        <>
+          <header className="route-panel-header">
         <div className="route-panel-brand">
           {/* Hamburger Menu button to open Map Options Drawer */}
           {onOpenMapOptions && (
@@ -187,6 +309,19 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
         </div>
 
         <div className="route-panel-header-actions">
+          {/* Mobile View Map Button (when user is editing a route on mobile) */}
+          {hasRoutes && !isMobileTripCardMode && (
+            <button
+              type="button"
+              className="panel-tool-btn mobile-view-map-btn"
+              onClick={() => setIsMobileTripCardMode(true)}
+              title={t('viewRoute')}
+              aria-label={t('viewRoute')}
+            >
+              <span>🗺️ {t('viewRoute')}</span>
+            </button>
+          )}
+
           {/* Map Options Button */}
           {onOpenMapOptions && (
             <button
@@ -220,6 +355,23 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
             aria-label="Toggle language between Arabic and English"
           >
             {language === 'ar' ? 'EN' : 'عربي'}
+          </button>
+
+          {/* Mobile Collapse Chevron Button */}
+          <button
+            type="button"
+            className="panel-tool-btn mobile-collapse-btn"
+            onClick={() => {
+              if (hasRoutes) {
+                setIsMobileTripCardMode(true);
+              } else {
+                setIsMobileCollapsed((prev) => !prev);
+              }
+            }}
+            title={isMobileCollapsed ? 'Expand' : 'Minimize'}
+            aria-label="Toggle panel"
+          >
+            {isMobileCollapsed ? '▲' : '▼'}
           </button>
         </div>
       </header>
@@ -515,6 +667,8 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
           onClearRecentRoutes={onClearRecentRoutes}
           onUpdatePreferences={onUpdatePreferences}
         />
+      )}
+        </>
       )}
     </aside>
   );

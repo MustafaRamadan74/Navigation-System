@@ -135,7 +135,7 @@ georoute/
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/MustafaRamadan74/Navigation-System.git
-   cd Navigation-System/georoute
+   cd Navigation-System
    ```
 
 2. **Install dependencies:**
@@ -144,7 +144,7 @@ georoute/
    ```
 
 3. **Configure Environment Variables:**
-   Create a `.env` file in the `georoute/` folder based on `.env.example`:
+   Create a `.env` file in the root folder based on `.env.example`:
    ```bash
    cp .env.example .env
    ```
@@ -163,7 +163,7 @@ georoute/
    ```bash
    npm run build
    ```
-   The compiled bundle will be output to `georoute/dist/`.
+   The compiled bundle will be output to `dist/`.
 
 ---
 

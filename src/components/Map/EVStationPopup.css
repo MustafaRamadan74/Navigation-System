@@ -198,3 +198,66 @@
   background: #ffb147;
   box-shadow: 0 4px 12px rgba(255, 158, 32, 0.4);
 }
+
+/* Modal Overlay & Responsive Positioning */
+.ev-popup-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ev-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 16, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: auto;
+  animation: fadeInBackdrop 0.2s ease-out forwards;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ev-popup-card-wrapper {
+  position: relative;
+  z-index: 10001;
+  pointer-events: auto;
+  margin-bottom: 24px;
+  animation: slideUpPopup 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpPopup {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .ev-popup-card-wrapper {
+    width: 100%;
+    margin-bottom: 0;
+    padding: 0 8px 16px 8px;
+    box-sizing: border-box;
+  }
+
+  .ev-popup-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 16px !important;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid rgba(255, 158, 32, 0.3) !important;
+  }
+}
+

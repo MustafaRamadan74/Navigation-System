@@ -64,12 +64,18 @@
 
 @media (max-width: 768px) {
   .floating-map-controls {
-    top: auto;
-    bottom: 80px;
+    top: 12px;
+    bottom: auto;
     right: 12px;
+    gap: 8px;
   }
   [dir='rtl'] .floating-map-controls {
     right: auto;
     left: 12px;
+  }
+  .floating-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
   }
 }

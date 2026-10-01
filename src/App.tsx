@@ -537,66 +537,70 @@ function App() {
         />
       )}
 
-      {/* Main Route and Search Panel */}
-      <RoutePanel
-        startPoint={startPoint}
-        destinationPoint={destinationPoint}
-        waypoints={waypoints}
-        isLocating={isLocating}
-        geolocationError={geolocationError}
-        validationError={validationError}
-        routes={routes}
-        selectedRouteIndex={selectedRouteIndex}
-        isRouting={isRouting}
-        routingError={routingError}
-        savedPlaces={savedPlaces}
-        recentRoutes={recentRoutes}
-        preferences={preferences}
-        theme={theme}
-        appMode={appMode}
-        basemapStyle={basemapStyle}
-        travelMode={travelMode}
-        onSelectTravelMode={setTravelMode}
-        onOpenMapOptions={() => setIsMapOptionsOpen(true)}
-        isOptimizingDelivery={isOptimizingDelivery}
-        isEVVisible={isEVVisible}
-        isLoadingEV={isLoadingEV}
-        evStationsCount={displayEVCount}
-        onToggleEV={handleToggleEV}
-        onToggleTheme={handleToggleTheme}
-        onSelectMode={setAppMode}
-        onSelectBasemap={handleSelectBasemap}
-        onOptimizeDelivery={handleOptimizeDelivery}
-        onStartDriving={startLiveTracking}
-        onStartSimulation={startSimulation}
-        onSelectStart={handleSelectStart}
-        onSelectDestination={handleSelectDestination}
-        onClearStart={handleClearStart}
-        onClearDestination={handleClearDestination}
-        onAddWaypoint={handleAddWaypoint}
-        onUpdateWaypoint={handleUpdateWaypoint}
-        onRemoveWaypoint={handleRemoveWaypoint}
-        onSwapPoints={handleSwapPoints}
-        onUseMyLocation={handleUseMyLocation}
-        onDismissGeoError={handleDismissGeoError}
-        onDismissValidationError={handleDismissValidationError}
-        onSelectRoute={handleSelectRoute}
-        onSelectStep={handleSelectStep}
-        onRetryRouting={handleRetryRouting}
-        onSelectRecentRoute={handleSelectRecentRoute}
-        onSavePlace={handleSavePlace}
-        onUpdatePlace={handleUpdatePlace}
-        onDeletePlace={handleDeletePlace}
-        onClearRecentRoutes={handleClearAllRecentRoutes}
-        onUpdatePreferences={handleUpdatePreferences}
-      />
+      {/* Main Route and Search Panel - hidden during active live navigation */}
+      {!isLiveActive && (
+        <RoutePanel
+          startPoint={startPoint}
+          destinationPoint={destinationPoint}
+          waypoints={waypoints}
+          isLocating={isLocating}
+          geolocationError={geolocationError}
+          validationError={validationError}
+          routes={routes}
+          selectedRouteIndex={selectedRouteIndex}
+          isRouting={isRouting}
+          routingError={routingError}
+          savedPlaces={savedPlaces}
+          recentRoutes={recentRoutes}
+          preferences={preferences}
+          theme={theme}
+          appMode={appMode}
+          basemapStyle={basemapStyle}
+          travelMode={travelMode}
+          onSelectTravelMode={setTravelMode}
+          onOpenMapOptions={() => setIsMapOptionsOpen(true)}
+          isOptimizingDelivery={isOptimizingDelivery}
+          isEVVisible={isEVVisible}
+          isLoadingEV={isLoadingEV}
+          evStationsCount={displayEVCount}
+          onToggleEV={handleToggleEV}
+          onToggleTheme={handleToggleTheme}
+          onSelectMode={setAppMode}
+          onSelectBasemap={handleSelectBasemap}
+          onOptimizeDelivery={handleOptimizeDelivery}
+          onStartDriving={startLiveTracking}
+          onStartSimulation={startSimulation}
+          onSelectStart={handleSelectStart}
+          onSelectDestination={handleSelectDestination}
+          onClearStart={handleClearStart}
+          onClearDestination={handleClearDestination}
+          onAddWaypoint={handleAddWaypoint}
+          onUpdateWaypoint={handleUpdateWaypoint}
+          onRemoveWaypoint={handleRemoveWaypoint}
+          onSwapPoints={handleSwapPoints}
+          onUseMyLocation={handleUseMyLocation}
+          onDismissGeoError={handleDismissGeoError}
+          onDismissValidationError={handleDismissValidationError}
+          onSelectRoute={handleSelectRoute}
+          onSelectStep={handleSelectStep}
+          onRetryRouting={handleRetryRouting}
+          onSelectRecentRoute={handleSelectRecentRoute}
+          onSavePlace={handleSavePlace}
+          onUpdatePlace={handleUpdatePlace}
+          onDeletePlace={handleDeletePlace}
+          onClearRecentRoutes={handleClearAllRecentRoutes}
+          onUpdatePreferences={handleUpdatePreferences}
+        />
+      )}
 
-      {/* Floating Map Controls: Find My Location & Map Options (TomTom Plan Image 1) */}
-      <FloatingMapControls
-        onFindMyLocation={handleUseMyLocation}
-        onOpenMapOptions={() => setIsMapOptionsOpen(true)}
-        isLocating={isLocating}
-      />
+      {/* Floating Map Controls: Find My Location & Map Options (TomTom Plan Image 1) - hidden during navigation */}
+      {!isLiveActive && (
+        <FloatingMapControls
+          onFindMyLocation={handleUseMyLocation}
+          onOpenMapOptions={() => setIsMapOptionsOpen(true)}
+          isLocating={isLocating}
+        />
+      )}
 
       {/* Map Options Drawer (TomTom Plan Image 2) */}
       <MapOptionsDrawer
@@ -615,16 +619,18 @@ function App() {
         onTogglePOI={handleTogglePOI}
       />
 
-      {/* Traffic & EV Controls */}
-      <TrafficControls
-        isVisible={isTrafficVisible}
-        onToggle={handleToggleTraffic}
-        showEVToggle={appMode === 'evTrip' || appMode === 'general'}
-        isEVVisible={isEVVisible}
-        isLoadingEV={isLoadingEV}
-        evStationsCount={displayEVCount}
-        onToggleEV={handleToggleEV}
-      />
+      {/* Traffic & EV Controls - hidden during navigation */}
+      {!isLiveActive && (
+        <TrafficControls
+          isVisible={isTrafficVisible}
+          onToggle={handleToggleTraffic}
+          showEVToggle={appMode === 'evTrip' || appMode === 'general'}
+          isEVVisible={isEVVisible}
+          isLoadingEV={isLoadingEV}
+          evStationsCount={displayEVCount}
+          onToggleEV={handleToggleEV}
+        />
+      )}
 
       {/* Map Component */}
       <Map
@@ -650,20 +656,15 @@ function App() {
 
       {/* EV Station Details Modal/Popup Overlay */}
       {selectedEVStation && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '24px',
-            right: language === 'ar' ? 'auto' : '24px',
-            left: language === 'ar' ? '24px' : 'auto',
-            zIndex: 1200,
-          }}
-        >
-          <EVStationPopup
-            station={selectedEVStation}
-            onClose={() => setSelectedEVStation(null)}
-            onSetAsWaypoint={handleAddEVStationAsStop}
-          />
+        <div className="ev-popup-modal-overlay">
+          <div className="ev-popup-backdrop" onClick={() => setSelectedEVStation(null)} />
+          <div className="ev-popup-card-wrapper">
+            <EVStationPopup
+              station={selectedEVStation}
+              onClose={() => setSelectedEVStation(null)}
+              onSetAsWaypoint={handleAddEVStationAsStop}
+            />
+          </div>
         </div>
       )}
     </main>
