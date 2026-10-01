@@ -1,0 +1,225 @@
+.traffic-controls-wrapper {
+  position: absolute;
+  top: 20px;
+  right: 68px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.traffic-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  padding: 8px 14px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.traffic-toggle-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.traffic-toggle-btn.is-active {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.traffic-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: background 0.2s ease;
+}
+
+.traffic-toggle-btn.is-active .traffic-indicator-dot {
+  background: var(--palette-gold, #FF9E20);
+  box-shadow: 0 0 8px var(--palette-gold, #FF9E20);
+  animation: pulseTraffic 2s infinite;
+}
+
+/* Legend popover */
+.traffic-legend-card {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  width: 200px;
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.2s ease;
+}
+
+.traffic-legend-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.traffic-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #e2e8f0;
+}
+
+.traffic-legend-bar {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.traffic-legend-bar.flow-fast {
+  background: var(--palette-teal, #215E61);
+}
+
+.traffic-legend-bar.flow-moderate {
+  background: #f59e0b;
+}
+
+.traffic-legend-bar.flow-slow {
+  background: #ef4444;
+}
+
+.traffic-legend-bar.flow-blocked {
+  background: #7f1d1d;
+}
+
+.traffic-legend-incident {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #e2e8f0;
+  padding-top: 4px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.traffic-incident-badge {
+  font-size: 13px;
+}
+
+@keyframes pulseTraffic {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 158, 32, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 158, 32, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 158, 32, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RTL: In RTL mode, RoutePanel is on the right, so place TrafficControls on the open left side */
+html[dir='rtl'] .traffic-controls-wrapper {
+  right: auto;
+  left: 20px;
+  align-items: flex-start;
+}
+
+/* Mobile responsive positioning */
+@media (max-width: 768px) {
+  .traffic-controls-wrapper {
+    top: 14px;
+    right: 60px;
+  }
+
+  html[dir='rtl'] .traffic-controls-wrapper {
+    top: 14px;
+    left: 14px;
+    right: auto;
+  }
+
+  /* Phase 18: Hide floating EV toggle on mobile; it is inside the bottom sheet */
+  .traffic-controls-wrapper .ev-toggle-btn {
+    display: none;
+  }
+
+  .traffic-toggle-btn {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+}
+
+/* Light Theme Styling */
+html.theme-light .traffic-toggle-btn {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(203, 213, 225, 0.85);
+  color: #334155;
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.12);
+}
+
+html.theme-light .traffic-toggle-btn:hover {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #0284c7;
+}
+
+html.theme-light .traffic-toggle-btn.is-active {
+  background: #ffffff;
+  border-color: #0284c7;
+  color: #0284c7;
+  box-shadow: 0 0 15px rgba(2, 132, 199, 0.2), 0 8px 20px -4px rgba(0, 0, 0, 0.1);
+}
+
+html.theme-light .traffic-legend-card {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(203, 213, 225, 0.9);
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
+}
+
+html.theme-light .traffic-legend-title {
+  color: #64748b;
+}
+
+html.theme-light .traffic-legend-item {
+  color: #1e293b;
+}
+
+html.theme-light .traffic-legend-incident {
+  color: #1e293b;
+  border-top-color: rgba(226, 232, 240, 0.9);
+}
+.controls-buttons-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}

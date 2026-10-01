@@ -1,0 +1,428 @@
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0f172a;
+}
+
+.map-wrapper.is-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important;
+}
+
+/* Custom Map Markers */
+.georoute-marker {
+  cursor: pointer;
+}
+
+.marker-pin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  position: relative;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.marker-pin:hover {
+  transform: rotate(-45deg) scale(1.15);
+}
+
+.marker-pin-start {
+  background: #215e61;
+  border: 2px solid #ffffff;
+}
+
+.marker-pin-dest {
+  background: #ff9e20;
+  border: 2px solid #ffffff;
+}
+
+.marker-pin-waypoint {
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+}
+
+/* Route Time Badges on Map (TomTom Plan Image 4) */
+.route-time-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.route-time-badge:hover {
+  transform: translateY(-2px) scale(1.06);
+}
+
+.route-time-badge.is-active {
+  background: #0284c7;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 18px rgba(2, 132, 199, 0.6), 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.route-time-badge.is-alternative {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+
+.badge-top-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.badge-dot {
+  opacity: 0.6;
+}
+
+.badge-sub-row {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.badge-sub-row.no-delay {
+  color: #e2f2f3;
+  opacity: 0.9;
+}
+
+.route-time-badge.is-active .badge-sub-row.no-delay {
+  color: #e0f2fe;
+}
+
+.badge-sub-row.has-delay {
+  color: #ef4444;
+}
+
+.route-time-badge.is-active .badge-sub-row.has-delay {
+  color: #fecdd3;
+}
+
+.marker-label {
+  transform: rotate(45deg);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: system-ui, -apple-system, sans-serif;
+  user-select: none;
+}
+
+/* TomTom Popup Overrides */
+.mapboxgl-popup-content {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+  border-bottom-color: #1e293b !important;
+}
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+  border-top-color: #1e293b !important;
+}
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+  border-right-color: #1e293b !important;
+}
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+  border-left-color: #1e293b !important;
+}
+
+.mapboxgl-popup-close-button {
+  color: #94a3b8 !important;
+  font-size: 16px !important;
+  padding: 4px 8px !important;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Loading state */
+.map-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: #f8fafc;
+  gap: 16px;
+  transition: opacity 0.3s ease;
+}
+
+.map-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(56, 189, 248, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: spin 0.9s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+}
+
+.map-loading-text {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: #e2e8f0;
+}
+
+/* Error state */
+.map-error-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1e293b;
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  color: #f8fafc;
+  text-align: center;
+}
+
+.map-error-icon {
+  width: 48px;
+  height: 48px;
+  color: #ef4444;
+  margin-bottom: 12px;
+}
+
+.map-error-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 8px;
+}
+
+.map-error-message {
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.map-retry-btn {
+  background: #38bdf8;
+  color: #0f172a;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-retry-btn:hover {
+  background: #0ea5e9;
+  transform: translateY(-1px);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Live Navigation Puck Marker */
+.live-nav-puck {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.puck-aura {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.35);
+  animation: puckPulse 1.8s ease-out infinite;
+}
+
+.live-nav-puck.mode-car .puck-aura {
+  background: rgba(56, 189, 248, 0.35);
+}
+
+.live-nav-puck.mode-motorcycle .puck-aura {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+.live-nav-puck.mode-pedestrian .puck-aura {
+  background: rgba(33, 94, 97, 0.4);
+}
+
+@keyframes puckPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.puck-pointer-ring {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  transition: transform 0.25s linear;
+  pointer-events: none;
+}
+
+.puck-pointer-arrow {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid #38bdf8;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.live-nav-puck.mode-motorcycle .puck-pointer-arrow {
+  border-bottom-color: #ff9e20;
+}
+
+.live-nav-puck.mode-pedestrian .puck-pointer-arrow {
+  border-bottom-color: #215e61;
+}
+
+.puck-core {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1d2128;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.live-nav-puck.mode-motorcycle .puck-core {
+  box-shadow: 0 0 16px rgba(255, 158, 32, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
+  border-color: #fef3c7;
+}
+
+.live-nav-puck.mode-pedestrian .puck-core {
+  box-shadow: 0 0 16px rgba(33, 94, 97, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
+  border-color: #99f6e4;
+}
+
+.puck-icon {
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+/* EV Station Marker - Prominent, High Visibility, Zero Green */
+.ev-station-marker {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #215e61;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 16px rgba(255, 158, 32, 0.75), 0 4px 12px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 500;
+}
+
+.ev-station-marker:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 24px rgba(255, 158, 32, 0.95), 0 6px 16px rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+
+.ev-station-marker.is-near-route::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  border: 2px solid #ff9e20;
+  animation: evRoutePulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes evRoutePulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.ev-marker-available {
+  background: #215e61;
+}
+
+.ev-marker-occupied {
+  background: #e11d48;
+}
+
+.ev-marker-out {
+  background: #334155;
+}
+
+.ev-marker-icon {
+  font-size: 17px;
+  line-height: 1;
+  color: #ff9e20;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}

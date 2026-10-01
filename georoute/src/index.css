@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-family-latin: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-arabic: 'Cairo', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Color Hunt Palette: #FF9E20 (Gold/Orange), #215E61 (Teal), #1D2128 (Obsidian), #F4F2F2 (Off-White) */
+  --palette-gold: #FF9E20;
+  --palette-teal: #215E61;
+  --palette-dark: #1D2128;
+  --palette-white: #F4F2F2;
+
+  --bg-app: #12151b;
+  --bg-card: rgba(29, 33, 40, 0.95);
+  --bg-card-hover: rgba(33, 94, 97, 0.25);
+  --bg-input: rgba(20, 24, 30, 0.88);
+  --bg-item: rgba(33, 94, 97, 0.18);
+  --bg-item-hover: rgba(33, 94, 97, 0.35);
+  --border-color: rgba(255, 158, 32, 0.22);
+  --border-color-hover: rgba(255, 158, 32, 0.45);
+  --border-gold: rgba(255, 158, 32, 0.38);
+  --border-teal: rgba(33, 94, 97, 0.5);
+
+  --text-primary: #F4F2F2;
+  --text-secondary: #cbd5e1;
+  --text-muted: #8e9bb0;
+  --text-gold: #FF9E20;
+  --text-teal: #4ca3a7;
+
+  --shadow-card: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 158, 32, 0.15);
+
+  /* Gold & Teal Accents */
+  --gold-primary: #FF9E20;
+  --gold-bright: #ffb147;
+  --gold-dark: #d97706;
+  --gold-gradient: linear-gradient(135deg, #FF9E20 0%, #e6850e 100%);
+  --gold-glow: 0 0 16px rgba(255, 158, 32, 0.35);
+
+  --teal-primary: #215E61;
+  --teal-bright: #2d8286;
+  --teal-dark: #164042;
+  --teal-glow: 0 0 16px rgba(33, 94, 97, 0.4);
+
+  --accent-primary: #FF9E20;
+  --accent-hover: #ffb147;
+  --accent-teal: #215E61;
+}
+
+html[lang='ar'] {
+  font-family: var(--font-family-arabic);
+}
+
+html[lang='en'] {
+  font-family: var(--font-family-latin);
+}
+
+/* Light Theme Tokens */
+html.theme-light {
+  --bg-app: #f4f2f2;
+  --bg-card: rgba(255, 255, 255, 0.96);
+  --bg-card-hover: rgba(244, 242, 242, 0.98);
+  --bg-input: rgba(244, 242, 242, 0.9);
+  --bg-item: rgba(33, 94, 97, 0.08);
+  --bg-item-hover: rgba(33, 94, 97, 0.16);
+  --border-color: rgba(33, 94, 97, 0.25);
+  --border-color-hover: rgba(255, 158, 32, 0.6);
+  --text-primary: #1D2128;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-gold: #d97706;
+  --shadow-card: 0 16px 30px -8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(33, 94, 97, 0.15);
+  --accent-primary: #FF9E20;
+  --accent-hover: #d97706;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0f172a;
+}
+
+/* Accessibility: Visible Focus Rings */
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}

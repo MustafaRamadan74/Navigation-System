@@ -1,0 +1,63 @@
+.ev-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #94a3b8;
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 32px;
+}
+
+.ev-toggle-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.ev-toggle-btn.is-active {
+  background: var(--palette-teal, #215E61);
+  border-color: var(--palette-gold, #FF9E20);
+  color: #F4F2F2;
+  box-shadow: 0 4px 16px rgba(33, 94, 97, 0.5), 0 0 10px rgba(255, 158, 32, 0.35);
+}
+
+.ev-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--palette-gold, #FF9E20);
+}
+
+.ev-toggle-badge {
+  background: var(--palette-gold, #FF9E20);
+  color: #1D2128;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.ev-toggle-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 158, 32, 0.3);
+  border-top-color: var(--palette-gold, #FF9E20);
+  border-radius: 50%;
+  animation: evSpin 0.7s linear infinite;
+}
+
+@keyframes evSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

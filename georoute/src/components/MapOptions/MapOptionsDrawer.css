@@ -1,0 +1,318 @@
+/* Map Options Drawer (TomTom Plan Image 2) with Dark, Gold & Red Luxury Styling */
+
+.map-options-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1999;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.map-options-drawer {
+  position: fixed;
+  top: 5px;
+  bottom: 5px;
+  left: 10px;
+  width: 340px;
+  max-width: calc(100vw - 20px);
+  height: calc(100vh - 10px);
+  background: var(--bg-card, rgba(14, 18, 27, 0.96));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-gold, rgba(212, 175, 55, 0.35));
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), var(--gold-glow);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideDrawer 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[dir='rtl'] .map-options-drawer {
+  left: auto;
+  right: 10px;
+  animation: slideDrawerRTL 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDrawer {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDrawerRTL {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.map-options-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color, rgba(212, 175, 55, 0.2));
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.map-options-title-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold-bright, #fbbf24);
+}
+
+.map-options-title-box h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--text-primary, #fffdf9);
+}
+
+.map-options-close-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary, #cbd5e1);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-options-close-btn:hover {
+  background: var(--red-primary, #e11d48);
+  border-color: var(--red-primary, #e11d48);
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.map-options-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+
+.map-options-content::-webkit-scrollbar {
+  width: 5px;
+}
+.map-options-content::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+}
+
+/* Quick Location button */
+.drawer-location-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-item, rgba(26, 32, 48, 0.7));
+  border: 1px solid var(--border-gold, rgba(212, 175, 55, 0.3));
+  border-radius: 10px;
+  color: var(--gold-bright, #fbbf24);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.drawer-location-btn:hover {
+  background: var(--gold-primary, #d4af37);
+  color: #0b0f17;
+  box-shadow: var(--gold-glow);
+  transform: translateY(-1px);
+}
+
+.drawer-btn-icon {
+  font-size: 1.1rem;
+}
+
+/* Section styling */
+.drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drawer-section-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--gold-bright, #fbbf24);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Section 1: MAP STYLES Grid (Compact: Icon + Name) */
+.map-styles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.style-compact-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  text-align: left;
+}
+
+[dir='rtl'] .style-compact-btn {
+  text-align: right;
+}
+
+.style-compact-btn:hover {
+  background: rgba(255, 158, 32, 0.1);
+  border-color: rgba(255, 158, 32, 0.35);
+  transform: translateY(-1px);
+}
+
+.style-compact-btn.is-selected {
+  background: rgba(255, 158, 32, 0.16);
+  border-color: var(--palette-gold, #FF9E20);
+  box-shadow: 0 0 12px rgba(255, 158, 32, 0.3);
+}
+
+.style-compact-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.style-compact-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary, #fffdf9);
+  flex: 1;
+}
+
+.style-compact-btn.is-selected .style-compact-label {
+  color: var(--gold-bright, #fbbf24);
+}
+
+.style-compact-check {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--palette-gold, #FF9E20);
+  margin-inline-start: auto;
+}
+
+/* Checkbox group for Traffic & POIs */
+.drawer-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawer-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.drawer-checkbox-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.drawer-checkbox-item input[type='checkbox'] {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.8px solid var(--border-gold, rgba(212, 175, 55, 0.4));
+  background: var(--bg-input, rgba(18, 24, 38, 0.8));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawer-checkbox-item input[type='checkbox']:checked + .checkbox-custom {
+  background: var(--gold-primary, #d4af37);
+  border-color: var(--gold-bright, #fbbf24);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+.drawer-checkbox-item input[type='checkbox']:checked + .checkbox-custom::after {
+  content: '✓';
+  color: #0b0f17;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.checkbox-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.select-all-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.select-all-row .checkbox-label {
+  color: var(--text-primary, #fffdf9);
+  font-weight: 800;
+}

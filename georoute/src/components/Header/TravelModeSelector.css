@@ -1,0 +1,74 @@
+.travel-mode-selector {
+  display: flex;
+  background: var(--bg-item, rgba(33, 94, 97, 0.16));
+  border: 1px solid var(--border-gold, rgba(255, 158, 32, 0.22));
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.travel-mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  min-height: 29px;
+  color: var(--text-secondary, #cbd5e1);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.travel-mode-btn:hover {
+  color: var(--text-primary, #f8fafc);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.travel-mode-btn.is-active {
+  background: var(--gold-gradient, linear-gradient(135deg, #FF9E20 0%, #e6850e 100%));
+  color: #1D2128;
+  box-shadow: 0 2px 10px rgba(255, 158, 32, 0.4);
+  font-weight: 800;
+}
+
+.travel-mode-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .travel-mode-btn {
+    min-height: 42px;
+    padding: 8px 6px;
+    font-size: 0.78rem;
+  }
+}
+
+html.theme-light .travel-mode-selector {
+  background: rgba(241, 245, 249, 0.9);
+  border-color: rgba(203, 213, 225, 0.85);
+}
+
+html.theme-light .travel-mode-btn {
+  color: #64748b;
+}
+
+html.theme-light .travel-mode-btn:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+html.theme-light .travel-mode-btn.is-active {
+  background: var(--palette-teal, #215E61);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(33, 94, 97, 0.4);
+}

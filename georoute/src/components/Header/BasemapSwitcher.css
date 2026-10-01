@@ -1,0 +1,125 @@
+.basemap-switcher-container {
+  position: relative;
+  display: inline-block;
+}
+
+.basemap-switcher-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #e2e8f0;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 38px;
+}
+
+.basemap-switcher-btn:hover,
+.basemap-switcher-btn.is-open {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.basemap-btn-icon {
+  font-size: 0.95rem;
+}
+
+.basemap-btn-label {
+  white-space: nowrap;
+}
+
+.basemap-chevron {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-inline-start: 2px;
+}
+
+.basemap-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 210px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  padding: 6px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: basemapDrop 0.2s ease-out;
+}
+
+@keyframes basemapDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.basemap-menu-header {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  padding: 6px 8px 4px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 4px;
+}
+
+.basemap-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: start;
+  width: 100%;
+  transition: all 0.15s ease;
+}
+
+.basemap-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.basemap-menu-item.is-selected {
+  background: rgba(33, 94, 97, 0.25);
+  color: var(--palette-gold, #FF9E20);
+  font-weight: 700;
+}
+
+.item-icon {
+  font-size: 1rem;
+}
+
+.item-label {
+  flex: 1;
+}
+
+.item-check {
+  color: var(--palette-gold, #FF9E20);
+  font-weight: 800;
+}

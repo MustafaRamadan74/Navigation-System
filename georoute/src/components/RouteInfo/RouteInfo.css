@@ -1,0 +1,546 @@
+.route-info-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Alternative Routes Comparison Bar */
+.route-alternatives-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.route-alt-card {
+  flex: 1;
+  min-width: 105px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1.5px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.route-alt-card:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.route-alt-card.is-active {
+  background: rgba(18, 24, 38, 0.95);
+  border-color: var(--gold-primary, #d4af37);
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.3);
+}
+
+.route-alt-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted, #8893a7);
+}
+
+.route-alt-card.is-active .route-alt-tag {
+  color: var(--gold-bright, #fbbf24);
+}
+
+.route-alt-time {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary, #fffdf9);
+}
+
+.route-alt-card.is-active .route-alt-time {
+  color: var(--gold-bright, #fbbf24);
+}
+
+.route-alt-diff {
+  font-size: 11px;
+  color: var(--text-muted, #8893a7);
+}
+
+/* Active Route Summary Card */
+.route-info-card {
+  background: var(--bg-card, rgba(29, 33, 40, 0.96));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-gold, rgba(255, 158, 32, 0.35));
+  border-radius: 11px;
+  padding: 10px;
+  box-shadow: 0 10px 24px -5px rgba(0, 0, 0, 0.6), var(--gold-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.route-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.route-info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 158, 32, 0.18);
+  color: var(--gold-bright, #ffb147);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2.5px 7px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 158, 32, 0.3);
+}
+
+.route-info-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--palette-gold, #FF9E20);
+}
+
+.route-info-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.route-info-eta {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--palette-gold, #FF9E20);
+  line-height: 1;
+  letter-spacing: -0.4px;
+}
+
+.route-info-distance {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.route-info-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11.5px;
+  color: #94a3b8;
+  padding-top: 3px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.route-info-arrival {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.route-info-traffic-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.route-info-traffic-tag.has-delay {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.route-info-traffic-tag.smooth-traffic {
+  background: rgba(33, 94, 97, 0.25);
+  color: #a5e2e4;
+  border: 1px solid rgba(33, 94, 97, 0.45);
+}
+
+/* GIS Export & Share Actions */
+.route-gis-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.gis-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #cbd5e1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.gis-action-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: #8b5cf6;
+  color: #f8fafc;
+}
+
+.gis-action-btn.share-btn {
+  background: rgba(139, 92, 246, 0.18);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+}
+
+.gis-action-btn.share-btn:hover {
+  background: rgba(139, 92, 246, 0.3);
+  color: #ffffff;
+}
+
+.gis-action-btn.share-btn.is-copied {
+  background: rgba(33, 94, 97, 0.35);
+  border-color: var(--palette-teal, #215E61);
+  color: #a5e2e4;
+}
+
+/* Turn-by-Turn Guidance Section */
+.directions-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 7px;
+  padding: 7px 10px;
+  color: #f8fafc;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.directions-toggle-btn:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.directions-chevron {
+  transition: transform 0.2s ease;
+}
+
+.directions-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.directions-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+  margin-top: 4px;
+}
+
+.directions-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-align: left;
+}
+
+.directions-step-item:hover {
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.directions-step-icon {
+  font-size: 16px;
+  color: #38bdf8;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.directions-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.directions-step-message {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #f8fafc;
+  line-height: 1.35;
+}
+
+.directions-step-distance {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Loading & Error States */
+.route-info-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  color: #94a3b8;
+  font-size: 13.5px;
+}
+
+.route-info-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(56, 189, 248, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.route-info-error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 10px;
+  padding: 12px;
+  color: #fca5a5;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.route-info-error-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.route-info-retry-btn {
+  align-self: flex-start;
+  background: rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fef2f2;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.route-info-retry-btn:hover {
+  background: rgba(239, 68, 68, 0.4);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================= */
+/* Light Theme Overrides for RouteInfo       */
+/* ========================================= */
+html.theme-light .route-alt-card {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(203, 213, 225, 0.85);
+}
+
+html.theme-light .route-alt-card:hover {
+  background: #ffffff;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+html.theme-light .route-alt-card.is-active {
+  background: #ffffff;
+  border-color: var(--palette-gold, #FF9E20);
+  box-shadow: 0 0 14px rgba(255, 158, 32, 0.25);
+}
+
+html.theme-light .route-alt-tag {
+  color: #64748b;
+}
+
+html.theme-light .route-alt-card.is-active .route-alt-tag {
+  color: var(--palette-gold, #FF9E20);
+}
+
+html.theme-light .route-alt-time {
+  color: #0f172a;
+}
+
+html.theme-light .route-alt-card.is-active .route-alt-time {
+  color: var(--palette-gold, #FF9E20);
+}
+
+html.theme-light .route-alt-diff {
+  color: #64748b;
+}
+
+html.theme-light .route-info-card {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(203, 213, 225, 0.85);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 0 20px rgba(33, 94, 97, 0.1);
+}
+
+html.theme-light .route-info-badge {
+  background: rgba(33, 94, 97, 0.12);
+  color: var(--palette-teal, #215E61);
+}
+
+html.theme-light .route-info-badge-dot {
+  background: var(--palette-teal, #215E61);
+}
+
+html.theme-light .route-info-eta {
+  color: var(--palette-teal, #215E61);
+}
+
+html.theme-light .route-info-distance {
+  color: #0f172a;
+}
+
+html.theme-light .route-info-meta {
+  color: #64748b;
+  border-top-color: rgba(226, 232, 240, 0.9);
+}
+
+html.theme-light .route-gis-actions {
+  border-top-color: rgba(226, 232, 240, 0.9);
+  border-bottom-color: rgba(226, 232, 240, 0.9);
+}
+
+html.theme-light .gis-action-btn {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(203, 213, 225, 0.85);
+  color: #334155;
+}
+
+html.theme-light .gis-action-btn:hover {
+  background: rgba(241, 245, 249, 1);
+  border-color: var(--palette-gold, #FF9E20);
+  color: #0f172a;
+}
+
+html.theme-light .gis-action-btn.share-btn {
+  background: rgba(33, 94, 97, 0.1);
+  border-color: rgba(33, 94, 97, 0.35);
+  color: var(--palette-teal, #215E61);
+}
+
+html.theme-light .gis-action-btn.share-btn:hover {
+  background: rgba(33, 94, 97, 0.2);
+  color: #164042;
+}
+
+html.theme-light .directions-toggle-btn {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(203, 213, 225, 0.85);
+  color: #0f172a;
+}
+
+html.theme-light .directions-toggle-btn:hover {
+  background: rgba(241, 245, 249, 1);
+  border-color: var(--palette-gold, #FF9E20);
+}
+
+html.theme-light .directions-step-item {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+html.theme-light .directions-step-item:hover {
+  background: rgba(241, 245, 249, 1);
+}
+
+html.theme-light .directions-step-message {
+  color: #0f172a;
+}
+
+html.theme-light .directions-step-distance {
+  color: #64748b;
+}
+
+/* Start Live Navigation Action */
+.nav-actions-group {
+  display: flex;
+  gap: 7px;
+  margin-top: 3px;
+}
+
+.start-nav-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--gold-gradient, linear-gradient(135deg, #f59e0b 0%, #d4af37 100%));
+  border: none;
+  border-radius: 9px;
+  color: #0b0f17;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: 36px;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.start-nav-btn:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #eab308 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.55);
+}
+
+.sim-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(225, 29, 72, 0.15);
+  border: 1px solid var(--border-red, rgba(225, 29, 72, 0.45));
+  border-radius: 9px;
+  color: #f43f5e;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: 36px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sim-nav-btn:hover {
+  background: var(--red-primary, #e11d48);
+  border-color: var(--red-primary, #e11d48);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.4);
+  transform: translateY(-1px);
+}
+
