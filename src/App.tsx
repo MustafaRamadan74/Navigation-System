@@ -373,15 +373,9 @@ function App() {
     };
   }, [isEVVisible, activeRouteCoords]);
 
-  // Visible EV stations count within current map extent (when no route active)
+  // Visible EV stations count within current map extent
   const [visibleEVCount, setVisibleEVCount] = useState<number>(0);
-
-  // Compute EV stations count for toggle: near-route count if route is active, otherwise visible in extent
-  const nearEVStationsCount = useMemo(
-    () => evStations.filter((s) => s.isNearRoute).length,
-    [evStations]
-  );
-  const displayEVCount = activeRouteCoords.length > 0 ? nearEVStationsCount : visibleEVCount;
+  const displayEVCount = visibleEVCount;
 
   // Phase 14: Delivery Mode Waypoint Optimization handler
   const handleOptimizeDelivery = async () => {
@@ -489,6 +483,16 @@ function App() {
     setDestinationPoint(startPoint);
     setValidationError(null);
   };
+
+  const handleClearRoute = useCallback(() => {
+    setRoutes([]);
+    setSelectedRouteIndex(0);
+    setDestinationPoint(null);
+    setWaypoints([]);
+    setFocusedCoordinate(null);
+    stopLiveTracking();
+    speechService.cancel();
+  }, [stopLiveTracking]);
 
   const handleUseMyLocation = async () => {
     setIsLocating(true);
@@ -653,6 +657,7 @@ function App() {
           onDeletePlace={handleDeletePlace}
           onClearRecentRoutes={handleClearAllRecentRoutes}
           onUpdatePreferences={handleUpdatePreferences}
+          onClearRoute={handleClearRoute}
         />
       )}
 

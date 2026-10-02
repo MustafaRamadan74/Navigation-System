@@ -414,10 +414,31 @@ export const Map: React.FC<MapProps> = ({
       } else {
         map.hideTrafficIncidents();
       }
+
+      // Ensure route layers stay on top of traffic layers ("علي الوش")
+      const routeLayerIds = [
+        ...routes.flatMap((_, idx) =>
+          idx !== selectedRouteIndex
+            ? [`georoute-alt-halo-${idx}`, `georoute-alt-outline-${idx}`, `georoute-alt-line-${idx}`]
+            : []
+        ),
+        'georoute-active-halo',
+        'georoute-active-outline',
+        'georoute-active-line',
+      ];
+      routeLayerIds.forEach((lId) => {
+        if (map.getLayer(lId)) {
+          try {
+            map.moveLayer(lId);
+          } catch {
+            // Ignore
+          }
+        }
+      });
     } catch (e) {
       console.warn('Traffic visibility toggle error:', e);
     }
-  }, [isTrafficVisible, trafficFlow, trafficIncidents, isMapReady, styleVersion]);
+  }, [isTrafficVisible, trafficFlow, trafficIncidents, isMapReady, styleVersion, routes, selectedRouteIndex]);
 
   // Update Start Marker
   useEffect(() => {
@@ -579,20 +600,23 @@ export const Map: React.FC<MapProps> = ({
       }
 
       // Filter stations by context:
-      // USER SPECIFICATION: Always display ONLY stations that are inside the visible map extent!
+      // USER SPECIFICATION: During a trip/route, ONLY stations inside the 20 km buffer appear!
+      // And in all cases, only display stations that are inside the visible map extent!
       let displayedStations: EVStation[] = [];
       try {
         const bounds = map.getBounds();
-        if (bounds) {
-          displayedStations = evStations.filter((st) => {
-            if (!st.coordinates || !Array.isArray(st.coordinates) || st.coordinates.length < 2) return false;
-            return bounds.contains(st.coordinates);
-          });
-        } else {
-          displayedStations = evStations;
-        }
+        displayedStations = evStations.filter((st) => {
+          if (!st.coordinates || !Array.isArray(st.coordinates) || st.coordinates.length < 2) return false;
+          // During route, strictly require station to be within the 20 km route buffer
+          if (routes.length > 0) {
+            if (!st.isNearRoute && (st.distanceToRouteKm === undefined || st.distanceToRouteKm > 20)) {
+              return false;
+            }
+          }
+          return bounds ? bounds.contains(st.coordinates) : true;
+        });
       } catch {
-        displayedStations = evStations;
+        displayedStations = [];
       }
 
       if (onVisibleEVCountChange) {
@@ -826,6 +850,31 @@ export const Map: React.FC<MapProps> = ({
           'line-opacity': activeStyle.coreOpacity,
         });
       }
+
+      // USER SPECIFICATION: Routes must ALWAYS be on top of everything ("علي الوش")
+      routes.forEach((_, idx) => {
+        if (idx !== selectedRouteIndex) {
+          [`georoute-alt-halo-${idx}`, `georoute-alt-outline-${idx}`, `georoute-alt-line-${idx}`].forEach((lId) => {
+            if (map.getLayer(lId)) {
+              try {
+                map.moveLayer(lId);
+              } catch {
+                // Ignore
+              }
+            }
+          });
+        }
+      });
+
+      ['georoute-active-halo', 'georoute-active-outline', 'georoute-active-line'].forEach((lId) => {
+        if (map.getLayer(lId)) {
+          try {
+            map.moveLayer(lId);
+          } catch {
+            // Ignore
+          }
+        }
+      });
 
       // 4. Place interactive Midpoint Duration Badges for each route (staggered to prevent overlap)
       if (!isDrivingMode) {

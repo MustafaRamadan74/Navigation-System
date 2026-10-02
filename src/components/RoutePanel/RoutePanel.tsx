@@ -67,6 +67,7 @@ export interface RoutePanelProps {
   onDeletePlace: (id: string) => void;
   onClearRecentRoutes: () => void;
   onUpdatePreferences: (prefs: Partial<UserPreferences>) => void;
+  onClearRoute?: () => void;
 }
 
 export const RoutePanel: React.FC<RoutePanelProps> = ({
@@ -121,6 +122,7 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   onDeletePlace,
   onClearRecentRoutes,
   onUpdatePreferences,
+  onClearRoute,
 }) => {
   const { t, language, setLanguage } = useI18n();
   const [activeTab, setActiveTab] = useState<'directions' | 'saved'>('directions');
@@ -205,18 +207,34 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
             <span className="pill-placeholder">{destinationPoint?.name || t('whereTo')}</span>
           </div>
 
-          <button
-            type="button"
-            className="pill-directions-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMobileCollapsed(false);
-            }}
-            title={t('tabDirections')}
-            aria-label="Directions"
-          >
-            🧭
-          </button>
+          {/* When route is active: prominent 'X' cancel trip button next to search! */}
+          {hasRoutes && onClearRoute ? (
+            <button
+              type="button"
+              className="pill-cancel-route-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClearRoute();
+              }}
+              title={language === 'ar' ? 'إلغاء الرحلة' : 'Cancel Route'}
+              aria-label="Cancel route"
+            >
+              ✕
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="pill-directions-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMobileCollapsed(false);
+              }}
+              title={t('tabDirections')}
+              aria-label="Directions"
+            >
+              🧭
+            </button>
+          )}
         </div>
       )}
 
@@ -264,16 +282,30 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="mobile-trip-edit-btn"
-                onClick={() => setIsMobileTripCardMode(false)}
-                title={t('editRoute')}
-                aria-label={t('editRoute')}
-              >
-                <span>✏️</span>
-                <span>{t('editRoute')}</span>
-              </button>
+              <div className="mobile-trip-header-buttons">
+                <button
+                  type="button"
+                  className="mobile-trip-edit-btn"
+                  onClick={() => setIsMobileTripCardMode(false)}
+                  title={t('editRoute')}
+                  aria-label={t('editRoute')}
+                >
+                  <span>✏️</span>
+                  <span>{t('editRoute')}</span>
+                </button>
+
+                {onClearRoute && (
+                  <button
+                    type="button"
+                    className="mobile-trip-cancel-btn"
+                    onClick={onClearRoute}
+                    title={language === 'ar' ? 'إلغاء الرحلة' : 'Cancel Route'}
+                    aria-label="Cancel route"
+                  >
+                    <span>✕</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Quick route alternatives if multiple routes exist */}
@@ -511,8 +543,8 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
               />
             </div>
 
-            {/* Swap Start & Destination (only when 0 waypoints) */}
-            {waypoints.length === 0 && (
+            {/* Swap Start & Destination (only when 0 waypoints and no active route) */}
+            {waypoints.length === 0 && !hasRoutes && (
               <button
                 type="button"
                 className="route-swap-btn"
@@ -524,6 +556,19 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
                   <polyline points="7 10 12 15 17 10" />
                   <polyline points="17 14 12 9 7 14" />
                 </svg>
+              </button>
+            )}
+
+            {/* When a route is calculated: Show prominent Cancel Trip button with 'X' right next to search! */}
+            {hasRoutes && onClearRoute && (
+              <button
+                type="button"
+                className="route-cancel-trip-btn"
+                onClick={onClearRoute}
+                title={language === 'ar' ? 'إلغاء الرحلة ومسح المسار' : 'Cancel Route'}
+                aria-label="Cancel route"
+              >
+                <span className="cancel-x-icon">✕</span>
               </button>
             )}
           </div>

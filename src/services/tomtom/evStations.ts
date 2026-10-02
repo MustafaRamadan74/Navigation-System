@@ -216,6 +216,33 @@ export function filterEVStationsByBounds(
 }
 
 /**
+ * Synchronously filters stations within maxDistanceKm (default 20 km) of a route polyline.
+ */
+export function filterStationsNearRoute(
+  stations: EVStation[],
+  routeCoordinates: [number, number][],
+  maxDistanceKm: number = 20
+): EVStation[] {
+  if (!routeCoordinates || routeCoordinates.length === 0 || !stations || stations.length === 0) {
+    return [];
+  }
+  const result: EVStation[] = [];
+  for (const st of stations) {
+    if (!st.coordinates || !Array.isArray(st.coordinates) || st.coordinates.length < 2) continue;
+    const dist = getMinDistanceToRouteKm(st.coordinates, routeCoordinates);
+    if (dist <= maxDistanceKm) {
+      result.push({
+        ...st,
+        distanceToRouteKm: Math.round(dist * 10) / 10,
+        isNearRoute: true,
+      });
+    }
+  }
+  result.sort((a, b) => (a.distanceToRouteKm || 0) - (b.distanceToRouteKm || 0));
+  return result;
+}
+
+/**
  * Searches EV stations along a computed route within a strict 20 km buffer.
  * During a trip, ONLY charging stations within 20 km of the route line appear on the map.
  */
@@ -229,22 +256,13 @@ export async function searchEVStationsAlongRoute(
   const allStations = await fetchAllEgyptEVStations();
 
   if (!routeCoordinates || routeCoordinates.length === 0) {
-    return allStations.map((s) => ({ ...s, isNearRoute: false }));
+    return [];
   }
 
-  // 2. Strict 20km Route Buffer: filter to keep ONLY stations within 20 km of the route line
+  // 2. Strict 20km Route Buffer: filter to keep ONLY stations strictly within 20 km of the route polyline
+  const nearStations = filterStationsNearRoute(allStations, routeCoordinates, maxDistanceKm);
   const stationsMap = new Map<string, EVStation>();
-
-  allStations.forEach((station) => {
-    const distKm = getMinDistanceToRouteKm(station.coordinates, routeCoordinates);
-    if (distKm <= maxDistanceKm) {
-      stationsMap.set(station.id, {
-        ...station,
-        distanceToRouteKm: Math.round(distKm * 10) / 10,
-        isNearRoute: true,
-      });
-    }
-  });
+  nearStations.forEach((st) => stationsMap.set(st.id, st));
 
   // 3. Supplement with TomTom nearby search along route key points (throttled to respect 5 QPS rate limit)
   if (TOMTOM_API_KEY && routeCoordinates.length > 0) {
