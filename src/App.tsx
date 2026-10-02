@@ -335,8 +335,8 @@ function App() {
     setIsLoadingEV(true);
 
     if (activeRouteCoords.length > 0) {
-      // Focus on all EV chargers within 20 km of route
-      searchEVStationsAlongRoute(activeRouteCoords, 20000)
+      // Focus strictly on EV chargers within 2.5 km corridor of the active route
+      searchEVStationsAlongRoute(activeRouteCoords, 2500)
         .then((stations) => {
           if (isSubscribed) {
             setEvStations(stations);

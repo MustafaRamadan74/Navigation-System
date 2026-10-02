@@ -8,7 +8,7 @@ import { formatDuration } from '../../utils/formatters';
 import { getRouteColorStyle, BasemapStyle } from '../../utils/routeColors';
 import { LiveLocation } from '../../hooks/useLiveTracking';
 import { DrivingCamera } from './DrivingCamera';
-import { EVStation } from '../../services/tomtom/evStations';
+import { EVStation, getMinDistanceToRouteKm } from '../../services/tomtom/evStations';
 import './Map.css';
 
 export const BASEMAP_STYLE_MAP: Record<BasemapStyle, tt.MapStyle> = {
@@ -177,6 +177,64 @@ export const Map: React.FC<MapProps> = ({
   const [styleVersion, setStyleVersion] = useState<number>(0);
   const [boundsVersion, setBoundsVersion] = useState<number>(0);
 
+  // Lifts all route polyline layers to the absolute top of the map layer stack ("علي الوش")
+  const liftRouteLayersToTop = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!map || typeof map.getLayer !== 'function') return;
+
+    try {
+      const style = map.getStyle();
+      if (!style || !style.layers || style.layers.length === 0) return;
+
+      const layers = style.layers;
+
+      // Desired layer stack in exact visual hierarchy (from bottom to top):
+      // 1. Alternative route halos
+      // 2. Alternative route outlines
+      // 3. Alternative route lines
+      // 4. Active route halo
+      // 5. Active route bold outline
+      // 6. Active route core vibrant line
+      const desiredRouteLayers: string[] = [];
+      layers
+        .filter((l) => l.id.startsWith('georoute-alt-halo-'))
+        .forEach((l) => desiredRouteLayers.push(l.id));
+      layers
+        .filter((l) => l.id.startsWith('georoute-alt-outline-'))
+        .forEach((l) => desiredRouteLayers.push(l.id));
+      layers
+        .filter((l) => l.id.startsWith('georoute-alt-line-'))
+        .forEach((l) => desiredRouteLayers.push(l.id));
+
+      if (map.getLayer('georoute-active-halo')) desiredRouteLayers.push('georoute-active-halo');
+      if (map.getLayer('georoute-active-outline')) desiredRouteLayers.push('georoute-active-outline');
+      if (map.getLayer('georoute-active-line')) desiredRouteLayers.push('georoute-active-line');
+
+      if (desiredRouteLayers.length === 0) return;
+
+      // Check if the current top layers of the map are ALREADY exactly our route layers in this exact order
+      const topSlice = layers.slice(-desiredRouteLayers.length).map((l) => l.id);
+      const isAlreadyOnTop =
+        topSlice.length === desiredRouteLayers.length &&
+        topSlice.every((id, idx) => id === desiredRouteLayers[idx]);
+
+      if (isAlreadyOnTop) {
+        return; // Already 100% on the absolute top of all layers!
+      }
+
+      // Elevate each route layer to the absolute top of the map layer stack
+      desiredRouteLayers.forEach((id) => {
+        try {
+          map.moveLayer(id);
+        } catch {
+          // Ignored
+        }
+      });
+    } catch {
+      // Ignored
+    }
+  }, []);
+
   // Track map extent changes (panning, zooming, rotating, pitching)
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -186,20 +244,53 @@ export const Map: React.FC<MapProps> = ({
       setBoundsVersion((v) => v + 1);
     };
 
+    const handleReorder = () => {
+      liftRouteLayersToTop();
+    };
+
     map.on('moveend', handleBoundsChange);
     map.on('zoomend', handleBoundsChange);
     map.on('rotateend', handleBoundsChange);
     map.on('pitchend', handleBoundsChange);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyMap = map as any;
+    if (typeof anyMap.on === 'function') {
+      anyMap.on('idle', handleReorder);
+      anyMap.on('sourcedata', handleReorder);
+      anyMap.on('styledata', handleReorder);
+    }
 
     return () => {
       map.off('moveend', handleBoundsChange);
       map.off('zoomend', handleBoundsChange);
       map.off('rotateend', handleBoundsChange);
       map.off('pitchend', handleBoundsChange);
+      if (typeof anyMap.off === 'function') {
+        anyMap.off('idle', handleReorder);
+        anyMap.off('sourcedata', handleReorder);
+        anyMap.off('styledata', handleReorder);
+      }
     };
-  }, [isMapReady]);
+  }, [isMapReady, liftRouteLayersToTop]);
+
+  // Periodic heartbeat to guarantee routes ALWAYS stay above dynamic traffic flow tiles
+  useEffect(() => {
+    if (routes.length === 0) return;
+    const interval = setInterval(() => {
+      liftRouteLayersToTop();
+    }, 400);
+    return () => clearInterval(interval);
+  }, [routes.length, liftRouteLayersToTop]);
 
   const activeRoute = routes[selectedRouteIndex] || routes[0];
+
+  const activeRouteCoords: [number, number][] = React.useMemo(() => {
+    if (activeRoute?.geojson?.features?.[0]?.geometry?.coordinates) {
+      return activeRoute.geojson.features[0].geometry.coordinates as [number, number][];
+    }
+    return [];
+  }, [activeRoute]);
 
   const initMap = useCallback(() => {
     if (!mapElementRef.current) return;
@@ -416,29 +507,11 @@ export const Map: React.FC<MapProps> = ({
       }
 
       // Ensure route layers stay on top of traffic layers ("علي الوش")
-      const routeLayerIds = [
-        ...routes.flatMap((_, idx) =>
-          idx !== selectedRouteIndex
-            ? [`georoute-alt-halo-${idx}`, `georoute-alt-outline-${idx}`, `georoute-alt-line-${idx}`]
-            : []
-        ),
-        'georoute-active-halo',
-        'georoute-active-outline',
-        'georoute-active-line',
-      ];
-      routeLayerIds.forEach((lId) => {
-        if (map.getLayer(lId)) {
-          try {
-            map.moveLayer(lId);
-          } catch {
-            // Ignore
-          }
-        }
-      });
+      liftRouteLayersToTop();
     } catch (e) {
       console.warn('Traffic visibility toggle error:', e);
     }
-  }, [isTrafficVisible, trafficFlow, trafficIncidents, isMapReady, styleVersion, routes, selectedRouteIndex]);
+  }, [isTrafficVisible, trafficFlow, trafficIncidents, isMapReady, styleVersion, liftRouteLayersToTop]);
 
   // Update Start Marker
   useEffect(() => {
@@ -600,21 +673,35 @@ export const Map: React.FC<MapProps> = ({
       }
 
       // Filter stations by context:
-      // USER SPECIFICATION: During a trip/route, ONLY stations inside the 20 km buffer appear!
-      // And in all cases, only display stations that are inside the visible map extent!
+      // USER SPECIFICATION: When user has a route/searches, ONLY display EV stations close to the route (2.5 km corridor)!
+      // Do NOT show all stations that are in the map extent!
       let displayedStations: EVStation[] = [];
       try {
         const bounds = map.getBounds();
-        displayedStations = evStations.filter((st) => {
-          if (!st.coordinates || !Array.isArray(st.coordinates) || st.coordinates.length < 2) return false;
-          // During route, strictly require station to be within the 20 km route buffer
-          if (routes.length > 0) {
-            if (!st.isNearRoute && (st.distanceToRouteKm === undefined || st.distanceToRouteKm > 20)) {
-              return false;
-            }
+        if (routes.length > 0 && activeRouteCoords.length > 0) {
+          const corridorStations: EVStation[] = [];
+          for (const st of evStations) {
+            if (!st.coordinates || !Array.isArray(st.coordinates) || st.coordinates.length < 2) continue;
+            // Calculate exact geometric distance to active route polyline
+            const distKm = getMinDistanceToRouteKm(st.coordinates, activeRouteCoords);
+            // Strictly exclude any station further than 2.5 km from the route!
+            if (distKm > 2.5) continue;
+            if (bounds && !bounds.contains(st.coordinates)) continue;
+
+            corridorStations.push({
+              ...st,
+              distanceToRouteKm: Math.round(distKm * 10) / 10,
+              isNearRoute: true,
+            });
           }
-          return bounds ? bounds.contains(st.coordinates) : true;
-        });
+          displayedStations = corridorStations;
+        } else if (routes.length === 0) {
+          // When NO route is active: display stations inside visible bounds (free browse mode)
+          displayedStations = evStations.filter((st) => {
+            if (!st.coordinates || !Array.isArray(st.coordinates) || st.coordinates.length < 2) return false;
+            return bounds ? bounds.contains(st.coordinates) : true;
+          });
+        }
       } catch {
         displayedStations = [];
       }
@@ -666,7 +753,7 @@ export const Map: React.FC<MapProps> = ({
     } catch (e) {
       console.warn('EV stations marker error:', e);
     }
-  }, [evStations, isEVVisible, isMapReady, onSelectEVStation, styleVersion, routes.length, boundsVersion, onVisibleEVCountChange, livePosition]);
+  }, [evStations, isEVVisible, isMapReady, onSelectEVStation, styleVersion, routes.length, activeRouteCoords, boundsVersion, onVisibleEVCountChange, livePosition]);
 
   // Fallback camera focus if no routes are computed yet
   useEffect(() => {
@@ -852,29 +939,7 @@ export const Map: React.FC<MapProps> = ({
       }
 
       // USER SPECIFICATION: Routes must ALWAYS be on top of everything ("علي الوش")
-      routes.forEach((_, idx) => {
-        if (idx !== selectedRouteIndex) {
-          [`georoute-alt-halo-${idx}`, `georoute-alt-outline-${idx}`, `georoute-alt-line-${idx}`].forEach((lId) => {
-            if (map.getLayer(lId)) {
-              try {
-                map.moveLayer(lId);
-              } catch {
-                // Ignore
-              }
-            }
-          });
-        }
-      });
-
-      ['georoute-active-halo', 'georoute-active-outline', 'georoute-active-line'].forEach((lId) => {
-        if (map.getLayer(lId)) {
-          try {
-            map.moveLayer(lId);
-          } catch {
-            // Ignore
-          }
-        }
-      });
+      liftRouteLayersToTop();
 
       // 4. Place interactive Midpoint Duration Badges for each route (staggered to prevent overlap)
       if (!isDrivingMode) {
@@ -930,10 +995,10 @@ export const Map: React.FC<MapProps> = ({
           bounds.extend([coord[0], coord[1]]);
         });
 
-        // If EV stations are visible, include nearest EV stations along route (up to 20 km) in viewport
+        // If EV stations are visible, include nearest EV stations along route corridor (up to 2.5 km) in viewport
         if (isEVVisible && evStations && evStations.length > 0) {
           const nearStations = evStations.filter(
-            (s) => s.isNearRoute && (s.distanceToRouteKm ?? 99) <= 20
+            (s) => s.isNearRoute && (s.distanceToRouteKm ?? 99) <= 2.5
           );
           // Include up to 2 closest near-route stations
           nearStations.slice(0, 2).forEach((st) => {

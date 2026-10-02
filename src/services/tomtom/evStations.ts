@@ -216,12 +216,13 @@ export function filterEVStationsByBounds(
 }
 
 /**
- * Synchronously filters stations within maxDistanceKm (default 20 km) of a route polyline.
+ * Synchronously filters stations within maxDistanceKm (default 3.5 km corridor) of a route polyline.
+ * This guarantees ONLY stations directly along the route appear, NOT distant stations across Cairo.
  */
 export function filterStationsNearRoute(
   stations: EVStation[],
   routeCoordinates: [number, number][],
-  maxDistanceKm: number = 20
+  maxDistanceKm: number = 3.5
 ): EVStation[] {
   if (!routeCoordinates || routeCoordinates.length === 0 || !stations || stations.length === 0) {
     return [];
@@ -243,14 +244,14 @@ export function filterStationsNearRoute(
 }
 
 /**
- * Searches EV stations along a computed route within a strict 20 km buffer.
- * During a trip, ONLY charging stations within 20 km of the route line appear on the map.
+ * Searches EV stations along a computed route within a strict 3.5 km corridor.
+ * During a trip, ONLY charging stations directly near the route line appear on the map.
  */
 export async function searchEVStationsAlongRoute(
   routeCoordinates: [number, number][],
-  radiusMeters: number = 20000
+  radiusMeters: number = 2500
 ): Promise<EVStation[]> {
-  const maxDistanceKm = radiusMeters / 1000; // 20 km buffer
+  const maxDistanceKm = radiusMeters / 1000; // 2.5 km corridor
 
   // 1. Get all verified stations across Egypt
   const allStations = await fetchAllEgyptEVStations();
@@ -259,7 +260,7 @@ export async function searchEVStationsAlongRoute(
     return [];
   }
 
-  // 2. Strict 20km Route Buffer: filter to keep ONLY stations strictly within 20 km of the route polyline
+  // 2. Strict Corridor Buffer: filter to keep ONLY stations directly near the route line
   const nearStations = filterStationsNearRoute(allStations, routeCoordinates, maxDistanceKm);
   const stationsMap = new Map<string, EVStation>();
   nearStations.forEach((st) => stationsMap.set(st.id, st));
