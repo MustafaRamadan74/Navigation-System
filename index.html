@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GeoRoute</title>
+    <script>
+      // When deployed on GitHub Pages from repository root, automatically redirect to the compiled /docs/ bundle
+      if (window.location.hostname.includes('github.io') && !window.location.pathname.includes('/docs/')) {
+        var base = window.location.pathname.replace(/\/+$/, '');
+        window.location.replace(base + '/docs/' + window.location.search + window.location.hash);
+      }
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=./docs/">
+    </noscript>
   </head>
   <body>
     <div id="root"></div>
