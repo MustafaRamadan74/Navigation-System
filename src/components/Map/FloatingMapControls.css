@@ -1,78 +1,97 @@
-/* Floating Map Controls (TomTom Plan Image 1) */
+/* Floating Map Controls - Unified Glassmorphism Vertical Column on the Right */
 
 .floating-map-controls {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 12px;
+  right: 12px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-[dir='rtl'] .floating-map-controls {
-  right: auto;
-  left: 15px;
+  gap: 8px;
+  align-items: center;
 }
 
 .floating-btn {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
-  background: var(--bg-card, rgba(14, 18, 27, 0.94));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-gold, rgba(212, 175, 55, 0.3));
-  color: var(--gold-bright, #fbbf24);
+  background: var(--bg-card, rgba(29, 33, 40, 0.94));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-color, rgba(255, 158, 32, 0.35));
+  color: var(--palette-gold, #FF9E20);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 0;
+  box-sizing: border-box;
+  user-select: none;
 }
 
 .floating-btn:hover {
-  background: var(--gold-primary, #d4af37);
+  background: var(--palette-gold, #FF9E20);
   color: #0b0f17;
-  border-color: var(--gold-bright, #fbbf24);
-  box-shadow: var(--gold-glow);
-  transform: translateY(-2px) scale(1.04);
+  border-color: #fbbf24;
+  box-shadow: 0 0 16px rgba(255, 158, 32, 0.65), 0 4px 12px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px) scale(1.05);
 }
 
 .floating-btn:active {
-  transform: translateY(0) scale(0.98);
+  transform: translateY(0) scale(0.96);
 }
 
+.floating-btn.is-active {
+  background: rgba(255, 158, 32, 0.22);
+  border-color: var(--palette-gold, #FF9E20);
+  box-shadow: 0 0 12px rgba(255, 158, 32, 0.4);
+}
+
+/* 3D / 2D Badge Text */
+.pitch-badge-text {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  font-family: inherit;
+}
+
+/* Compass Needle Icon */
+.compass-icon-svg {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: block;
+}
+
+/* Find Location Spinner */
 .find-location-trigger.is-locating {
-  border-color: var(--gold-bright, #fbbf24);
+  border-color: #fbbf24;
 }
 
 .locating-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2.5px solid rgba(212, 175, 55, 0.3);
-  border-top-color: var(--gold-bright, #fbbf24);
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 158, 32, 0.3);
+  border-top-color: #fbbf24;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-@media (max-width: 768px) {
+/* Mobile & Tablet Adjustments */
+@media (max-width: 992px) {
   .floating-map-controls {
-    top: 12px;
-    bottom: auto;
-    right: 12px;
-    gap: 8px;
+    top: 10px;
+    right: 10px;
+    gap: 7px;
   }
-  [dir='rtl'] .floating-map-controls {
-    right: auto;
-    left: 12px;
-  }
+
   .floating-btn {
     width: 38px;
     height: 38px;

@@ -124,7 +124,10 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
 }) => {
   const { t, language, setLanguage } = useI18n();
   const [activeTab, setActiveTab] = useState<'directions' | 'saved'>('directions');
-  const [isMobileCollapsed, setIsMobileCollapsed] = useState<boolean>(false);
+  // Default to collapsed mode showing only the top search bar on mobile & tablet (<= 992px)
+  const [isMobileCollapsed, setIsMobileCollapsed] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 992 : false
+  );
   const canAddMoreStops = waypoints.length < 5;
 
   const hasRoutes = routes && routes.length > 0;
@@ -141,12 +144,12 @@ export const RoutePanel: React.FC<RoutePanelProps> = ({
   }, [routes.length]);
 
   const [isMobileScreen, setIsMobileScreen] = useState<boolean>(() =>
-    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+    typeof window !== 'undefined' ? window.innerWidth <= 992 : false
   );
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobileScreen(window.innerWidth <= 768);
+      setIsMobileScreen(window.innerWidth <= 992);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);

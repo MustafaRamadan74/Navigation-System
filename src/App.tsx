@@ -31,6 +31,7 @@ import { speechService } from './services/voice/speechService';
 import { optimizeWaypoints } from './services/routing/optimizeWaypoints';
 import { EVStation, searchEVStationsAlongRoute, fetchAllEgyptEVStations } from './services/tomtom/evStations';
 import { BasemapStyle } from './utils/routeColors';
+import tt from '@tomtom-international/web-sdk-maps';
 import './App.css';
 
 function isSameCoord(c1: [number, number], c2: [number, number]): boolean {
@@ -129,6 +130,68 @@ function App() {
     speechService.setMuted(next);
     setIsVoiceMuted(next);
   };
+
+  // Map instance reference and state for custom right-side controls
+  const [mapInstance, setMapInstance] = useState<tt.Map | null>(null);
+  const [mapBearing, setMapBearing] = useState<number>(0);
+  const [is3D, setIs3D] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  // Sync map bearing and pitch with FloatingMapControls
+  useEffect(() => {
+    if (!mapInstance) return;
+
+    const handleRotate = () => {
+      setMapBearing(Math.round(mapInstance.getBearing()));
+    };
+
+    const handlePitch = () => {
+      setIs3D(mapInstance.getPitch() > 15);
+    };
+
+    mapInstance.on('rotate', handleRotate);
+    mapInstance.on('pitch', handlePitch);
+
+    return () => {
+      mapInstance.off('rotate', handleRotate);
+      mapInstance.off('pitch', handlePitch);
+    };
+  }, [mapInstance]);
+
+  // Sync document fullscreen state
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const handleResetNorth = useCallback(() => {
+    if (!mapInstance) return;
+    mapInstance.easeTo({
+      bearing: 0,
+      pitch: 0,
+      duration: 500,
+    });
+  }, [mapInstance]);
+
+  const handleTogglePitch = useCallback(() => {
+    if (!mapInstance) return;
+    const current = mapInstance.getPitch();
+    mapInstance.easeTo({
+      pitch: current > 15 ? 0 : 58,
+      duration: 500,
+    });
+  }, [mapInstance]);
+
+  const handleToggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }, []);
 
   const activeRoute = routes[selectedRouteIndex] || routes[0];
 
@@ -593,14 +656,18 @@ function App() {
         />
       )}
 
-      {/* Floating Map Controls: Find My Location & Map Options (TomTom Plan Image 1) - hidden during navigation */}
-      {!isLiveActive && (
-        <FloatingMapControls
-          onFindMyLocation={handleUseMyLocation}
-          onOpenMapOptions={() => setIsMapOptionsOpen(true)}
-          isLocating={isLocating}
-        />
-      )}
+      {/* Floating Map Controls: Layers, Location, 3D/2D Pitch, Compass/Reset North, Fullscreen */}
+      <FloatingMapControls
+        onFindMyLocation={handleUseMyLocation}
+        onOpenMapOptions={() => setIsMapOptionsOpen(true)}
+        isLocating={isLocating}
+        onResetNorth={handleResetNorth}
+        onTogglePitch={handleTogglePitch}
+        onToggleFullscreen={handleToggleFullscreen}
+        bearing={mapBearing}
+        is3D={is3D}
+        isFullscreen={isFullscreen}
+      />
 
       {/* Map Options Drawer (TomTom Plan Image 2) */}
       <MapOptionsDrawer
@@ -652,6 +719,7 @@ function App() {
         onSelectRoute={handleSelectRoute}
         onSelectEVStation={(st) => setSelectedEVStation(st)}
         onVisibleEVCountChange={setVisibleEVCount}
+        onMapLoaded={setMapInstance}
       />
 
       {/* EV Station Details Modal/Popup Overlay */}

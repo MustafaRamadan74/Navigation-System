@@ -177,7 +177,7 @@ export const Map: React.FC<MapProps> = ({
   const [styleVersion, setStyleVersion] = useState<number>(0);
   const [boundsVersion, setBoundsVersion] = useState<number>(0);
 
-  // Track map extent changes (panning, zooming)
+  // Track map extent changes (panning, zooming, rotating, pitching)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !isMapReady) return;
@@ -188,10 +188,14 @@ export const Map: React.FC<MapProps> = ({
 
     map.on('moveend', handleBoundsChange);
     map.on('zoomend', handleBoundsChange);
+    map.on('rotateend', handleBoundsChange);
+    map.on('pitchend', handleBoundsChange);
 
     return () => {
       map.off('moveend', handleBoundsChange);
       map.off('zoomend', handleBoundsChange);
+      map.off('rotateend', handleBoundsChange);
+      map.off('pitchend', handleBoundsChange);
     };
   }, [isMapReady]);
 
@@ -242,30 +246,16 @@ export const Map: React.FC<MapProps> = ({
 
       drivingCameraRef.current.setMap(map);
 
-      // Add navigation controls (zoom, compass, pitch, rotation)
-      map.addControl(
-        new tt.NavigationControl({
-          showZoom: true,
-          showCompass: true,
-          showPitch: true,
-          showExtendedRotationControls: true,
-        }),
-        'top-right'
-      );
-
-      // Add fullscreen control
-      map.addControl(
-        new tt.FullscreenControl({ container: mapWrapperRef.current }),
-        'top-right'
-      );
-
-      // Add scale control
+      // Add scale control (bottom-left)
       map.addControl(new tt.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
       map.on('load', () => {
         setIsLoading(false);
         setIsMapReady(true);
         drivingCameraRef.current.setMap(map);
+        if (onMapLoadedRef.current) {
+          onMapLoadedRef.current(map);
+        }
 
         // Click inspection for alternative routes and traffic incidents
         map.on('click', (e) => {
@@ -589,20 +579,20 @@ export const Map: React.FC<MapProps> = ({
       }
 
       // Filter stations by context:
-      // 1) When an active route exists (routes.length > 0):
-      //    evStations is already strictly filtered to the 20 km buffer from the route!
-      // 2) When no active route (general map browsing):
-      //    Display only stations that are currently inside the visible map extent/viewport!
-      let displayedStations = evStations;
-      if (routes.length === 0) {
-        try {
-          const bounds = map.getBounds();
-          if (bounds) {
-            displayedStations = evStations.filter((st) => bounds.contains(st.coordinates));
-          }
-        } catch {
-          // Fallback to all
+      // USER SPECIFICATION: Always display ONLY stations that are inside the visible map extent!
+      let displayedStations: EVStation[] = [];
+      try {
+        const bounds = map.getBounds();
+        if (bounds) {
+          displayedStations = evStations.filter((st) => {
+            if (!st.coordinates || !Array.isArray(st.coordinates) || st.coordinates.length < 2) return false;
+            return bounds.contains(st.coordinates);
+          });
+        } else {
+          displayedStations = evStations;
         }
+      } catch {
+        displayedStations = evStations;
       }
 
       if (onVisibleEVCountChange) {
@@ -610,28 +600,40 @@ export const Map: React.FC<MapProps> = ({
       }
 
       displayedStations.forEach((st) => {
-        const el = document.createElement('div');
+        // Outer anchor wrapper: strictly positioned by tt.Marker with no CSS transitions or transforms
+        const wrapper = document.createElement('div');
+        wrapper.className = 'ev-marker-anchor-wrapper';
+
+        // Inner bubble: styles, colors, badges, and hover scaling
+        const bubble = document.createElement('div');
         const statusClass =
           st.status === 'available'
             ? 'ev-marker-available'
             : st.status === 'occupied'
             ? 'ev-marker-occupied'
-            : 'ev-marker-available'; // Default to teal
+            : 'ev-marker-available';
         const nearRouteClass = st.isNearRoute ? 'is-near-route' : '';
 
-        el.className = `ev-station-marker ${statusClass} ${nearRouteClass}`.trim();
+        bubble.className = `ev-marker-bubble ${statusClass} ${nearRouteClass}`.trim();
         const distInfo = st.distanceToRouteKm !== undefined ? ` • ${st.distanceToRouteKm} km from route` : '';
-        el.title = `${st.name}${distInfo} (Click for details)`;
-        el.innerHTML = `<span class="ev-marker-icon">⚡</span>`;
+        bubble.title = `${st.name}${distInfo} (Click for details)`;
+        bubble.innerHTML = `<span class="ev-marker-icon">⚡</span>`;
 
-        el.addEventListener('click', (e) => {
+        bubble.addEventListener('click', (e) => {
           e.stopPropagation();
           if (onSelectEVStation) {
             onSelectEVStation(st);
           }
         });
 
-        const marker = new tt.Marker({ element: el, anchor: 'center' })
+        wrapper.appendChild(bubble);
+
+        const marker = new tt.Marker({
+          element: wrapper,
+          anchor: 'center',
+          pitchAlignment: 'viewport',
+          rotationAlignment: 'viewport',
+        })
           .setLngLat(st.coordinates)
           .addTo(map);
 
@@ -640,7 +642,7 @@ export const Map: React.FC<MapProps> = ({
     } catch (e) {
       console.warn('EV stations marker error:', e);
     }
-  }, [evStations, isEVVisible, isMapReady, onSelectEVStation, styleVersion, routes.length, boundsVersion, onVisibleEVCountChange]);
+  }, [evStations, isEVVisible, isMapReady, onSelectEVStation, styleVersion, routes.length, boundsVersion, onVisibleEVCountChange, livePosition]);
 
   // Fallback camera focus if no routes are computed yet
   useEffect(() => {

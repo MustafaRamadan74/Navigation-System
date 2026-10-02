@@ -409,20 +409,20 @@ html[dir='rtl'] .route-panel-card {
   }
 }
 
-/* Mobile Top Floating Search Pill (Visible when collapsed on small screens) */
+/* Mobile Top Floating Search Pill (Visible when collapsed on mobile & tablet) */
 .mobile-top-search-pill {
   position: absolute;
   top: 12px;
   left: 12px;
   right: auto;
-  width: calc(100% - 130px);
-  max-width: 380px;
-  height: 42px;
-  background: rgba(29, 33, 40, 0.94);
+  width: auto;
+  max-width: calc(100vw - 200px);
+  height: 40px;
+  background: var(--bg-card, rgba(29, 33, 40, 0.94));
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 158, 32, 0.35);
-  border-radius: 22px;
+  border: 1px solid var(--border-color, rgba(255, 158, 32, 0.35));
+  border-radius: 20px;
   display: flex;
   align-items: center;
   padding: 0 6px 0 10px;
@@ -432,27 +432,44 @@ html[dir='rtl'] .route-panel-card {
   gap: 8px;
   transition: all 0.2s ease;
   user-select: none;
+  box-sizing: border-box;
 }
 
 html[dir='rtl'] .mobile-top-search-pill {
   left: auto;
   right: 12px;
   padding: 0 10px 0 6px;
+  max-width: calc(100vw - 200px);
+}
+
+@media (max-width: 992px) {
+  .mobile-top-search-pill {
+    top: 10px;
+    left: 10px;
+    height: 38px;
+    max-width: calc(100vw - 195px);
+  }
+  html[dir='rtl'] .mobile-top-search-pill {
+    left: auto;
+    right: 10px;
+    max-width: calc(100vw - 195px);
+  }
 }
 
 .pill-menu-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: transparent;
   border: none;
   color: var(--palette-gold, #FF9E20);
-  font-size: 17px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .pill-input-mock {
@@ -462,11 +479,13 @@ html[dir='rtl'] .mobile-top-search-pill {
   gap: 6px;
   overflow: hidden;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .pill-icon {
   font-size: 13px;
   opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .pill-placeholder {
@@ -475,34 +494,36 @@ html[dir='rtl'] .mobile-top-search-pill {
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pill-directions-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: rgba(255, 158, 32, 0.2);
   border: 1px solid rgba(255, 158, 32, 0.4);
   color: var(--palette-gold, #FF9E20);
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  flex-shrink: 0;
 }
 
 /* Hide mobile search pill on desktop */
-@media (min-width: 769px) {
+@media (min-width: 993px) {
   .mobile-top-search-pill {
     display: none !important;
   }
 }
 
 /* ========================================= */
-/* Responsive & Mobile Bottom Sheet Layout   */
+/* Responsive & Mobile/Tablet Bottom Sheet   */
 /* ========================================= */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .route-panel-card {
     top: auto;
     bottom: 0;
